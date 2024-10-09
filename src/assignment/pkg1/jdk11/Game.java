@@ -4,6 +4,7 @@
  */
 package assignment.pkg1.jdk11;
 
+//hi
 
 import java.util.Scanner;
 import java.io.BufferedReader;
@@ -17,7 +18,6 @@ import java.util.Comparator;
 import java.util.InputMismatchException;
 import java.util.Random;
 
-//hi
 
 public class Game 
 {
