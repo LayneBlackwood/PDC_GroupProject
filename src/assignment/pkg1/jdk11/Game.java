@@ -21,12 +21,18 @@ import java.util.List;
 import java.util.Comparator;
 import java.util.InputMismatchException;
 import java.util.Random;
-
+import javax.swing.*;
 
 public class Game 
 {
+    
+   
+            
     public static void main(String[] args) 
     {
+        
+        launchGUI();
+        
         Scanner scanner = new Scanner(System.in);
         int enemyBattleCount = 0;
 
@@ -251,6 +257,11 @@ public class Game
             }
         }
     }
+    
+     public static void launchGUI() 
+   {
+        new GameGUI().setVisible(true);
+   }
 
     public static void displaySortedScoreboard() 
     {
