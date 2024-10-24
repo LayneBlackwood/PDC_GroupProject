@@ -7,85 +7,55 @@ package assignment.pkg1.jdk11;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 import java.util.Random;
+import javax.swing.*;
 
 /**
  *
  * @author jackson and layne
  */
 
+
+
+
 public class FightEnemyAction 
 {
-    Scanner scanner = new Scanner(System.in);
-    Random rand = new Random();
+    private Player player;
+    private Enemy enemy;
+    private JTextArea scenarioTextArea;
 
-    Player player;
-    Enemy enemy;
-
-    public FightEnemyAction(Player player, Enemy enemy) 
+    public FightEnemyAction(Player player, Enemy enemy, JTextArea scenarioTextArea) 
     {
         this.player = player; 
         this.enemy = enemy;
+        this.scenarioTextArea = scenarioTextArea;
     }
 
-    public void fightEnemy(Player player, Enemy enemy) 
+    public void fightEnemy() 
     {
         while (player.getHp() > 0 && enemy.getHp() > 0) 
         {
-            System.out.println("You attack the " + enemy.getName() + "!");
-            System.out.println("How would you like to attack the " + enemy.getName() + "?");
-            System.out.println("1. Light Attack.");
-            System.out.println("2. Heavy Attack.");
-            System.out.println("3. Special Attack.");
-            int damage = 0;
-
-            int playerAttackChoice = getPlayerChoice(3);
+            scenarioTextArea.append("You attack the " + enemy.getName() + "!\n");
+            int playerAttackChoice = getPlayerChoice();
 
             switch (playerAttackChoice) 
             {
                 case 1:
-                    System.out.println("You used a light Attack!");
-                    damage = player.getLightAttackDamage();
-                    System.out.println("This hit the " + enemy.getName() + " and dealt " + damage);
-                    enemy.takeDamage(damage);
+                    attackEnemy("light");
                     break;
-
                 case 2:
-                    System.out.println("You used a heavy attack!");
-                    
-                    if (rand.nextInt(3) < 2) 
-                    {
-                        damage = player.getHeavyAttackDamage();
-                        System.out.println("The attack hit the " + enemy.getName() + " and dealt " + damage);
-                        enemy.takeDamage(damage);
-                    } 
-                    else 
-                    {
-                        System.out.println("The heavy attack missed!");
-                    }
+                    attackEnemy("heavy");
                     break;
-
                 case 3:
-                    System.out.println("You used a special attack!");
-                    if (rand.nextBoolean()) 
-                    {
-                        System.out.println("The special attack hit the enemy!");
-                        damage = player.getEquippedItem() != null ? player.getEquippedItem().getAttackBonus() * 2 : player.getMaxAttack();
-                        enemy.takeDamage(damage);
-                    } 
-                    else 
-                    {
-                        System.out.println("The special attack missed!");
-                    }
+                    attackEnemy("special");
                     break;
-
                 default:
-                    System.out.println("Invalid input.");
+                    scenarioTextArea.append("Invalid input.\n");
                     break;
             }
 
             if (enemy.getHp() <= 0) 
             {
-                System.out.println("The " + enemy.getName() + " has been defeated");
+                scenarioTextArea.append("The " + enemy.getName() + " has been defeated!\n");
                 player.gainEvilXP(enemy.getXP());
                 return;
             }
@@ -94,33 +64,100 @@ public class FightEnemyAction
         }
     }
 
+    private void attackEnemy(String attackType) 
+    {
+        Random rand = new Random();
+        int damage = 0;
+        switch (attackType) 
+        {
+            case "light":
+                damage = player.getLightAttackDamage();
+                scenarioTextArea.append("You used a light attack! It dealt " + damage + " damage.\n");
+                enemy.takeDamage(damage);
+                break;
+            case "heavy":
+                if (rand.nextInt(3) < 2) 
+                {
+                    damage = player.getHeavyAttackDamage();
+                    scenarioTextArea.append("You used a heavy attack! It dealt " + damage + " damage.\n");
+                    enemy.takeDamage(damage);
+                } 
+                else 
+                {
+                    scenarioTextArea.append("The heavy attack missed!\n");
+                }
+                break;
+            case "special":
+                if (rand.nextBoolean()) 
+                {
+                    damage = player.getEquippedItem() != null ? player.getEquippedItem().getAttackBonus() * 2 : player.getMaxAttack();
+                    scenarioTextArea.append("You used a special attack! It dealt " + damage + " damage.\n");
+                    enemy.takeDamage(damage);
+                } 
+                else 
+                {
+                    scenarioTextArea.append("The special attack missed!\n");
+                }
+                break;
+        }
+    }
+
     private void enemyAttackSequence() 
     {
         String enemyAttack = enemy.generateEnemyAttack();
-        System.out.println(enemyAttack);
+        scenarioTextArea.append(enemyAttack + "\n");
 
-        System.out.println("How would you like to dodge this attack?");
-        System.out.println("1. Jump back");
-        System.out.println("2. Side step");
-        System.out.println("3. Block attack");
-
-        int dodgeChoice = dodgeChoiceTimer(3);
+        int dodgeChoice = getDodgeChoice();
         int playerDamage = dodgeOutcome(dodgeChoice, enemyAttack);
 
         if (playerDamage > 0) 
         {
-            System.out.println("You take " + playerDamage + " damage!");
+            scenarioTextArea.append("You take " + playerDamage + " damage!\n");
             player.loseHP(playerDamage);
         } 
-        else if (playerDamage == 0) 
+        else 
         {
-            System.out.println("You dodged the attack!");
+            scenarioTextArea.append("You dodged the attack!\n");
         }
 
         if (!player.isAlive()) 
         {
-            player.gameOver();
+            scenarioTextArea.append("Game Over! You have been defeated.\n");
         }
+    }
+
+    private int getPlayerChoice() 
+    {
+        String options = "1. Light Attack.\n2. Heavy Attack.\n3. Special Attack.";
+        String input = JOptionPane.showInputDialog(null, "How would you like to attack the " + enemy.getName() + "?\n" + options);
+        return parseChoice(input);
+    }
+
+    private int getDodgeChoice() 
+    {
+        String options = "1. Jump back\n2. Side step\n3. Block attack";
+        String input = JOptionPane.showInputDialog(null, "How would you like to dodge this attack?\n" + options);
+        return parseChoice(input);
+    }
+
+    private int parseChoice(String input) 
+    {
+        if (input != null) 
+        {
+            try 
+            {
+                int choice = Integer.parseInt(input);
+                if (choice >= 1 && choice <= 3) 
+                {
+                    return choice;
+                }
+            } 
+            catch (NumberFormatException e) 
+            {
+                // Handle number format exception if input is not a valid integer
+            }
+        }
+        return -1; // Return an invalid choice
     }
 
     private int dodgeOutcome(int dodgeChoice, String enemyAttack) 
@@ -130,173 +167,62 @@ public class FightEnemyAction
 
         switch (dodgeChoice) 
         {
-            case 1:
+            case 1: // Jump back
                 if (enemyAttack.contains("kick")) 
                 {
-                    System.out.println("You jump back and avoid the kick!");
+                    scenarioTextArea.append("You jump back and avoid the kick!\n");
                 } 
                 else if (enemyAttack.contains("punch")) 
                 {
-                    System.out.println("You jump back but the punch still connects! The punch has lost some of its strength.");
+                    scenarioTextArea.append("You jump back but the punch still connects! You take reduced damage.\n");
                     damageTaken = (enemyDamage + 2) / 3;
                 } 
                 else if (enemyAttack.contains("weapon")) 
                 {
-                    System.out.println("You jump back but the weapon still grazes you! You take reduced damage from the weapon attack");
+                    scenarioTextArea.append("You jump back but the weapon still grazes you! You take reduced damage.\n");
                     damageTaken = (enemyDamage + 1) / 2;
                 }
                 break;
 
-            case 2:
+            case 2: // Side step
                 if (enemyAttack.contains("kick")) 
                 {
-                    System.out.println("You side step but the kick still connects! You take reduced damage.");
+                    scenarioTextArea.append("You side step but the kick still connects! You take reduced damage.\n");
                     damageTaken = (enemyDamage + 2) / 3;
                 } 
                 else if (enemyAttack.contains("punch")) 
                 {
-                    System.out.println("You side step but the punch still hits!");
+                    scenarioTextArea.append("You side step but the punch still hits! You take full damage.\n");
                     damageTaken = enemyDamage;
                 } 
                 else if (enemyAttack.contains("weapon")) 
                 {
-                    System.out.println("You side step the overarm slash and fully dodge the attack!");
+                    scenarioTextArea.append("You side step the overarm slash and fully dodge the attack!\n");
                 }
                 break;
 
-            case 3:
+            case 3: // Block attack
                 if (enemyAttack.contains("kick")) 
                 {
-                    System.out.println("You try and block the kick! The kick still hits but reduced damage is taken.");
+                    scenarioTextArea.append("You try to block the kick! The kick still hits but reduced damage is taken.\n");
                     damageTaken = (enemyDamage + 2) / 3;
                 } 
                 else if (enemyAttack.contains("punch")) 
                 {
-                    System.out.println("You block the punch and take no damage!");
+                    scenarioTextArea.append("You block the punch and take no damage!\n");
                 } 
                 else if (enemyAttack.contains("weapon")) 
                 {
-                    System.out.println("You try to block the weapon attack! The weapon still hits and full damage is dealt.");
+                    scenarioTextArea.append("You try to block the weapon attack! The weapon still hits and full damage is dealt.\n");
                     damageTaken = enemyDamage;
                 }
                 break;
 
             default:
-                System.out.println("Invalid choice.");
+                scenarioTextArea.append("Invalid choice.\n");
                 break;
         }
 
         return damageTaken;
-    }
-
-    
-    //dodgeChoiceTimer
-    
-    private int dodgeChoiceTimer(int maxOption) 
-    {
-        final int[] dodgeChoice = {-1};
-
-        Thread timerThread = new Thread(() -> 
-        {
-            System.out.println("You have 10 seconds to choose how you want to dodge!");
-
-            for (int i = 10; i >= 0; i--) 
-            {
-                System.out.println(i);
-                try 
-                {
-                    Thread.sleep(1000);  // Pause for 1 second
-                } 
-                catch (InterruptedException e) 
-                {
-                    return;  // Exit the thread if the player makes a choice
-                }
-            }
-
-            if (dodgeChoice[0] == -1) 
-            {
-                System.out.println("Time's up! The enemy attack hits!");
-                dodgeChoice[0] = maxOption; // Set to maxOption when time is up
-                
-                System.out.println("Please enter any character to continue: ");
-            }
-        });
-
-        timerThread.start();
-
-        while (dodgeChoice[0] == -1) 
-        {
-            try 
-            {
-                if (scanner.hasNextInt()) 
-                {
-                    int input = scanner.nextInt();
-                    if (input >= 1 && input <= maxOption) 
-                    {
-                        dodgeChoice[0] = input;
-                    } 
-                    else 
-                    {
-                        System.out.println("Invalid choice. You are hit with the attack!");
-                        dodgeChoice[0] = maxOption; // Invalid input results in being hit
-                    }
-                    timerThread.interrupt();  // Stop the timer
-                } 
-                else 
-                {
-                    System.out.println("Invalid input. You are hit with the attack!");
-                    scanner.next(); // Clear the invalid input
-                    dodgeChoice[0] = maxOption; // Invalid input results in being hit
-                    timerThread.interrupt();  // Stop the timer
-                }
-            } 
-            catch (InputMismatchException e) 
-            {
-                System.out.println("Invalid input. You are hit with the attack!");
-                scanner.next(); // Clear the invalid input
-                dodgeChoice[0] = maxOption; // Invalid input results in being hit
-                timerThread.interrupt();  // Stop the timer
-            }
-        }
-
-        return dodgeChoice[0];
-    }
-
-
-
-    private int getPlayerChoice(int maxOption) 
-    {
-        int choice = -1;
-        boolean validInput = false;
-
-        while (!validInput) 
-        {
-            try 
-            {
-                if (scanner.hasNextInt()) 
-                {
-                    choice = scanner.nextInt();
-                    if (choice < 1 || choice > maxOption) 
-                    {
-                        System.out.println("Invalid choice. Please select a number between 1 and " + maxOption + ".");
-                    } 
-                    else 
-                    {
-                        validInput = true;
-                    }
-                } 
-                else 
-                {
-                    System.out.println("Invalid input. Please enter a number.");
-                    scanner.next();
-                }
-            } 
-            catch (InputMismatchException e) 
-            {
-                System.out.println("Invalid input. Please enter a number.");
-                scanner.next();
-            }
-        }
-        return choice;
     }
 }
