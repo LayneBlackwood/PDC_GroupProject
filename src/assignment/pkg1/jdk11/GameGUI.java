@@ -25,6 +25,13 @@ public class GameGUI extends JFrame
     private JButton option3Button;
     private JButton bossButton;
     private JTextArea textArea;
+    private JPanel statsPanel;
+    private JLabel healthLabel;
+    private JLabel xpLabel;
+    private JButton quitButton;
+    
+    private static final int MAX_LINES = 10;
+    
     
     private Player player;
     private Enemy currentEnemy;
@@ -41,7 +48,12 @@ public class GameGUI extends JFrame
         scenarioTextArea = new JTextArea(10,50);
         scenarioTextArea.setEditable(false);
         scenarioTextArea.setVisible(false);
+        scenarioTextArea.setLineWrap(true);
+        scenarioTextArea.setWrapStyleWord(true);
+        
         JScrollPane scrollPane = new JScrollPane(scenarioTextArea);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Show vertical scrollbar as needed
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Disable horizontal scrollbar
         add(scrollPane, BorderLayout.CENTER);
         
         //Panel for the option buttons
@@ -75,6 +87,35 @@ public class GameGUI extends JFrame
 
         add(inputPanel, BorderLayout.NORTH);  // Add input panel at the top (NORTH)
         
+        statsPanel = new JPanel();
+        statsPanel.setLayout(new GridLayout(2, 1));
+        healthLabel = new JLabel();  // Initialize healthLabel
+        xpLabel = new JLabel();      // Initialize xpLabel
+        statsPanel.add(healthLabel); // Add healthLabel to statsPanel
+        statsPanel.add(xpLabel);     // Add xpLabel to statsPanel
+        statsPanel.setPreferredSize(new Dimension(200, 0)); // Set width to 200 pixels, height to default
+
+        quitButton = new JButton("Quit");
+        buttonPanel.add(quitButton);
+
+        add(statsPanel, BorderLayout.EAST); // Add statsPanel to the EAST side of the layout
+
+        quitButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int choice = JOptionPane.showConfirmDialog(
+                GameGUI.this,
+                "Are you sure you want to quit?",
+                "Quit Confirmation",
+                JOptionPane.YES_NO_OPTION
+            );
+            if (choice == JOptionPane.YES_OPTION) {
+                System.exit(0); // Exit the application
+            }
+        }
+    });
+        
+        
         confirmButton.addActionListener(new ActionListener()
         {
             @Override
@@ -83,7 +124,7 @@ public class GameGUI extends JFrame
             String playerName = nameTextField.getText().trim();
             if(!playerName.isEmpty())
             {
-                player = new Player(playerName);
+                player = new Player(playerName, GameGUI.this);
                 initializeGameForPlayer();
             }else
                 {
@@ -132,10 +173,11 @@ public class GameGUI extends JFrame
         option1Button.setVisible(true);
         option2Button.setVisible(true);
         option3Button.setVisible(true);
+        statsPanel.setVisible(true);
 
         // Start the game and display the first scenario
         scenarioTextArea.setText("Welcome, " + player.getName() + "! The game begins now...");
-        
+        updatePlayerStats();
         
         try {
             scenarioReader = new BufferedReader(new FileReader("scenarios.txt"));
@@ -150,13 +192,13 @@ public class GameGUI extends JFrame
         String title = scenarioReader.readLine();
 
         if (title == null) {
-            scenarioTextArea.append("\nNo more scenarios available. The game is over.");
+            appendText("\nNo more scenarios available. The game is over.");
             disableGameOptions();
             return;
         }
 
         // Display the scenario
-        scenarioTextArea.append("\n" + title + "\n");
+        appendText("\n" + title + "\n");
 
         // Read the three options from the file
         String option1 = scenarioReader.readLine();
@@ -164,7 +206,7 @@ public class GameGUI extends JFrame
         String option3 = scenarioReader.readLine();
 
         if (option1 == null || option2 == null || option3 == null) {
-            scenarioTextArea.append("\nScenario options are incomplete.");
+            appendText("\nScenario options are incomplete.");
             disableGameOptions();
             return;
         }
@@ -181,7 +223,7 @@ public class GameGUI extends JFrame
             bossButton.setVisible(false);
         }
     } catch (IOException e) {
-        scenarioTextArea.append("\nError reading next scenario: " + e.getMessage());
+        appendText("\nError reading next scenario: " + e.getMessage());
     }
 }
 
@@ -192,51 +234,92 @@ public class GameGUI extends JFrame
        option3Button.setEnabled(false);
        bossButton.setEnabled(false);
     }
+    
+    
+    void appendText(String text) {
+    // Append text to the JTextArea
+    scenarioTextArea.append(text);
+    
+    // If there's a maximum line limit, handle that here (if needed)
+    String[] lines = scenarioTextArea.getText().split("\n");
+    if (lines.length > MAX_LINES) {
+        StringBuilder newText = new StringBuilder();
+        for (int i = lines.length - MAX_LINES; i < lines.length; i++) {
+            newText.append(lines[i]).append("\n");
+        }
+        scenarioTextArea.setText(newText.toString());
+    }
+
+    // Auto-scroll to the bottom
+    scenarioTextArea.setCaretPosition(scenarioTextArea.getDocument().getLength());
+}
+
+
+   
 
     
     
     private void handleOption1()
     {
+        if (player.getHp() <= 0) 
+        {
+            endGame();
+        };
+        
+        
         currentEnemy = Enemy.generateEnemy(player);
-        scenarioTextArea.append("\nYou chose to attack the worker!");
+        appendText("\nYou chose to attack the worker!");
         fightEnemy();
         player.gainEvilXP(10);
-        loadNextScenario();
+        updatePlayerStats();
+        
     }
     
     private void handleOption2()
     {
+        if (player.getHp() <= 0) 
+        {
+            endGame();
+        }    
+        
         if (attemptEscape()) 
         {
-            scenarioTextArea.append("\nYou successfully escaped!");
+            appendText("\nYou successfully escaped!");
         } else 
         {
-            scenarioTextArea.append("\nYou failed to escape and must fight!");
+           appendText("\nYou failed to escape and must fight!");
             currentEnemy = Enemy.generateEnemy(player);
             fightEnemy();
         }
         player.gainNeutralXP(10);
-        loadNextScenario();
+        updatePlayerStats();
+        
     }
     
     private void handleOption3()
     {
+        if (player.getHp() <= 0)
+        {
+            endGame();
+        }
+            
+        
         if (player.giveAwayHealingPotion()) 
         {
-            scenarioTextArea.append("\nYou chose to gift generously!");
+            appendText("\nYou chose to gift generously!");
             player.gainGoodXP(10);
         } 
         else 
         {
-            scenarioTextArea.append("\nYou have no healing potions to give.");
+            appendText("\nYou have no healing potions to give.");
         }
-        loadNextScenario();
+        updatePlayerStats();
     }
     
     private void fightBoss() 
     {
         currentEnemy = Enemy.getBoss();
-        scenarioTextArea.append("\nYou chose to fight the Boss!");
+        appendText("\nYou chose to fight the Boss!");
         fightEnemy();
         bossButton.setVisible(false);
         loadNextScenario();
@@ -247,8 +330,8 @@ public class GameGUI extends JFrame
         @Override
         protected Void doInBackground() throws Exception {
             // Perform the fight logic off the EDT
-            FightEnemyAction fight = new FightEnemyAction(player, currentEnemy);
-            fight.fightEnemy(player, currentEnemy); 
+            FightEnemyAction fight = new FightEnemyAction(player, currentEnemy, scenarioTextArea);
+            fight.fightEnemy(); 
             return null;
         }
 
@@ -256,13 +339,17 @@ public class GameGUI extends JFrame
         protected void done() {
             // This runs after doInBackground() completes, on the EDT
             try {
-                if (currentEnemy.getHp() <= 0) {
-                    scenarioTextArea.append("\nEnemy defeated!");
+                if(player.getHp() <= 0)
+                {
+                    endGame();
+                }
+                else if (currentEnemy.getHp() <= 0) {
+                    appendText("\nEnemy defeated!");
                     // After the fight ends, move to the next scenario
                     loadNextScenario();  // Now move to the next scenario
                 } else {
                     // If the enemy is not defeated, update the UI with current fight status
-                    scenarioTextArea.append("\nEnemy HP: " + currentEnemy.getHp());
+                    appendText("\nEnemy HP: " + currentEnemy.getHp());
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -283,7 +370,63 @@ public class GameGUI extends JFrame
         int escapeChance = rand.nextInt(100);
         return escapeChance < 70;
     }
+     private void updatePlayerStats() 
+     {
+        healthLabel.setText("Health: " + player.getHp()); // Display health
+        // Assuming you have a method in Player to get XP
+        xpLabel.setText("XP: " + player.getTotalXP()); // Display XP
+    }
+     
+     private void showScoreboard() 
+     {
+    StringBuilder scoreboard = new StringBuilder();
+    scoreboard.append("Player: ").append(player.getName()).append("\n");
+    scoreboard.append("Total XP: ").append(player.getTotalXP()).append("\n");
+    scoreboard.append("Final Health: ").append(player.getHp()).append("\n");
+
+    JOptionPane.showMessageDialog(this, scoreboard.toString(), "Scoreboard", JOptionPane.INFORMATION_MESSAGE);
+     }
+     
+     private void endGame()
+     {
+        disableGameOptions();
+        showScoreboard(); // Show the scoreboard at the end of the game
+        
+        int choice = JOptionPane.showConfirmDialog(this, "Do you want to save your score?", "Save Score", JOptionPane.YES_NO_OPTION);
     
+        if (choice == JOptionPane.YES_OPTION) 
+        {
+            saveScore(player);
+        }
+        
+        System.exit(0);
+     }
+     
+     private void saveScore(Player player) 
+    {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Scoreboard.txt", true))) 
+        {
+            writer.write("Player: " + player.getName());
+            writer.newLine();
+            writer.write("Total XP: " + player.getTotalXP());
+            writer.newLine();
+            writer.write("Final Health: " + player.getHp());
+            writer.newLine();
+            writer.write("-----------------------------"); // Separator for clarity
+            writer.newLine();
+            writer.close();
+            
+            JOptionPane.showMessageDialog(this, "Score saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } 
+        catch (IOException e) 
+        {
+        JOptionPane.showMessageDialog(this, "Error saving score: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);        
+        }
+    }
+
+     
+     
 }
+
 
 

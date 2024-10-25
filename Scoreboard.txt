@@ -2,3 +2,7 @@ Test1: 70 , King type: Evil king!
 Test2: 0 , King type: Neither
 Test3: 170 , King type: Evil king!
 Steve: 70 , King type: Evil king!
+Player: Jackson
+Total XP: 10
+Final Health: 0
+-----------------------------
