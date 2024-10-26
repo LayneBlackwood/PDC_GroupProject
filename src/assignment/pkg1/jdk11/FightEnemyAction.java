@@ -32,19 +32,23 @@ public class FightEnemyAction
         this.scenarioTextArea = scenarioTextArea;
     }
 
-    public void fightEnemy() {
-        while (player.getHp() > 0 && enemy.getHp() > 0) {
+    public void fightEnemy() 
+    {
+        while (player.getHp() > 0 && enemy.getHp() > 0) 
+        {
             scenarioTextArea.append("You attack the " + enemy.getName() + "!\n");
             scenarioTextArea.append("Player HP: " + player.getHp() + ", Enemy HP: " + enemy.getHp() + "\n");
 
-            if (!player.isAlive()) {
+            if (!player.isAlive()) 
+            {
                 scenarioTextArea.append("Game Over! You have been defeated.\n");
                 return; // Exit the fight
             }
 
             int playerAttackChoice = getPlayerChoice();
 
-            switch (playerAttackChoice) {
+            switch (playerAttackChoice) 
+            {
                 case 1:
                     attackEnemy("light");
                     break;
@@ -59,7 +63,8 @@ public class FightEnemyAction
                     break;
             }
 
-            if (enemy.getHp() <= 0) {
+            if (enemy.getHp() <= 0) 
+            {
                 scenarioTextArea.append("The " + enemy.getName() + " has been defeated!\n");
                 player.gainEvilXP(enemy.getXP());
                 return;
@@ -69,82 +74,105 @@ public class FightEnemyAction
         }
 
         // If the player has been defeated, output game over message
-        if (!player.isAlive()) {
+        if (!player.isAlive()) 
+        {
             scenarioTextArea.append("Game Over! You have been defeated.\n");
         }
     }
 
-    private void attackEnemy(String attackType) {
+    private void attackEnemy(String attackType) 
+    {
         Random rand = new Random();
         int damage = 0;
-        switch (attackType) {
+        switch (attackType) 
+        {
             case "light":
                 damage = player.getLightAttackDamage();
                 scenarioTextArea.append("You used a light attack! It dealt " + damage + " damage.\n");
                 enemy.takeDamage(damage);
                 break;
             case "heavy":
-                if (rand.nextInt(3) < 2) {
+                if (rand.nextInt(3) < 2) 
+                {
                     damage = player.getHeavyAttackDamage();
                     scenarioTextArea.append("You used a heavy attack! It dealt " + damage + " damage.\n");
                     enemy.takeDamage(damage);
-                } else {
+                } 
+                else 
+                {
                     scenarioTextArea.append("The heavy attack missed!\n");
                 }
                 break;
             case "special":
-                if (rand.nextBoolean()) {
+                if (rand.nextBoolean()) 
+                {
                     damage = player.getEquippedItem() != null ? player.getEquippedItem().getAttackBonus() * 2 : player.getMaxAttack();
                     scenarioTextArea.append("You used a special attack! It dealt " + damage + " damage.\n");
                     enemy.takeDamage(damage);
-                } else {
+                } 
+                else 
+                {
                     scenarioTextArea.append("The special attack missed!\n");
                 }
                 break;
         }
     }
 
-    private void enemyAttackSequence() {
-        SwingUtilities.invokeLater(() -> { // Ensure UI update happens on the EDT
+    private void enemyAttackSequence() 
+    {
+        SwingUtilities.invokeLater(() -> 
+        { // Ensure UI update happens on the EDT
             String enemyAttack = enemy.generateEnemyAttack();
             scenarioTextArea.append(enemyAttack + "\n");
 
             int dodgeChoice = getDodgeChoice();
             int playerDamage = dodgeOutcome(dodgeChoice, enemyAttack);
 
-            if (playerDamage > 0) {
+            if (playerDamage > 0) 
+            {
                 scenarioTextArea.append("You take " + playerDamage + " damage!\n");
                 player.loseHP(playerDamage);
-            } else {
+            } 
+            else 
+            {
                 scenarioTextArea.append("You dodged the attack!\n");
             }
 
-            if (!player.isAlive()) {
+            if (!player.isAlive()) 
+            {
                 scenarioTextArea.append("Game Over! You have been defeated.\n");
             }
         });
     }
 
-    private int getPlayerChoice() {
+    private int getPlayerChoice() 
+    {
         String options = "1. Light Attack.\n2. Heavy Attack.\n3. Special Attack.";
         String input = JOptionPane.showInputDialog(null, "How would you like to attack the " + enemy.getName() + "?\n" + options);
         return parseChoice(input);
     }
 
-    private int getDodgeChoice() {
+    private int getDodgeChoice() 
+    {
         String options = "1. Jump back\n2. Side step\n3. Block attack";
         String input = JOptionPane.showInputDialog(null, "How would you like to dodge this attack?\n" + options);
         return parseChoice(input);
     }
 
-    private int parseChoice(String input) {
-        if (input != null) {
-            try {
+    private int parseChoice(String input) 
+    {
+        if (input != null) 
+        {
+            try 
+            {
                 int choice = Integer.parseInt(input);
-                if (choice >= 1 && choice <= 3) {
+                if (choice >= 1 && choice <= 3) 
+                {
                     return choice;
                 }
-            } catch (NumberFormatException e) {
+            } 
+            catch (NumberFormatException e) 
+            {
                 // Handle number format exception if input is not a valid integer
             }
         }
