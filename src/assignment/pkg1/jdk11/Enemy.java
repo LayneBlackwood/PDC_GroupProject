@@ -5,8 +5,10 @@
 package assignment.pkg1.jdk11;
 
 import java.util.Random;
-import java.util.List;
-import java.util.ArrayList;
+/**
+ *
+ * @author jackson and layne
+ */
 
 public abstract class Enemy 
 {

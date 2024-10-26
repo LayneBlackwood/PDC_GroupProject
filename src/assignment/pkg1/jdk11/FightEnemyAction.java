@@ -14,212 +14,157 @@ import javax.swing.*;
  * @author jackson and layne
  */
 
+//FightEnemyAction coordinates the fight sequence between the player and the enemy, handling the flow of player attacks and enemy responses.
 public class FightEnemyAction 
 {
-    
-    private Player player;
-    private Enemy enemy;
-    private JTextArea scenarioTextArea;
+    private final Player player;
+    private final Enemy enemy;
+    private final JTextArea scenarioTextArea;
 
-    public FightEnemyAction(Player player, Enemy enemy, JTextArea scenarioTextArea) {
+    public FightEnemyAction(Player player, Enemy enemy, JTextArea scenarioTextArea) 
+    {
         this.player = player;
         this.enemy = enemy;
         this.scenarioTextArea = scenarioTextArea;
     }
 
+   //Starts the fight sequence, alternating between player attacks and enemy responses.
     public void fightEnemy() 
     {
-        while (player.getHp() > 0 && enemy.getHp() > 0) 
+        while (player.isAlive() && enemy.getHp() > 0) 
         {
-            scenarioTextArea.append("You attack the " + enemy.getName() + "!\n");
-            scenarioTextArea.append("Player HP: " + player.getHp() + ", Enemy HP: " + enemy.getHp() + "\n");
+            displayHealthStatus(); // Display current health of both player and enemy
 
-            if (!player.isAlive()) 
-            {
-                scenarioTextArea.append("Game Over! You have been defeated.\n");
-                return; // Exit the fight
-            }
+            // Get the player's chosen attack type and execute the attack
+            AttackType attackType = selectAttackType(getPlayerChoice());
+            attackType.execute(player, enemy, scenarioTextArea);
 
-            int playerAttackChoice = getPlayerChoice();
-
-            switch (playerAttackChoice) 
-            {
-                case 1:
-                    attackEnemy("light");
-                    break;
-                case 2:
-                    attackEnemy("heavy");
-                    break;
-                case 3:
-                    attackEnemy("special");
-                    break;
-                default:
-                    scenarioTextArea.append("Invalid input.\n");
-                    break;
-            }
-
+            // Check if the enemy has been defeated
             if (enemy.getHp() <= 0) 
             {
                 scenarioTextArea.append("The " + enemy.getName() + " has been defeated!\n");
                 player.gainEvilXP(enemy.getXP());
-                return;
+                return; // Exit the fight after defeating the enemy
             }
 
+            // Enemy's turn to attack and player's turn to dodge
             enemyAttackSequence();
         }
 
-        // If the player has been defeated, output game over message
+        // Check if the player has been defeated
         if (!player.isAlive()) 
         {
             scenarioTextArea.append("Game Over! You have been defeated.\n");
         }
     }
-
-    private void attackEnemy(String attackType) 
+    
+    private int getPlayerChoice() 
     {
-        Random rand = new Random();
-        int damage = 0;
-        switch (attackType) 
+        // Display options for the player
+        String options = "1. Light Attack\n2. Heavy Attack\n3. Special Attack";
+        String input = JOptionPane.showInputDialog(null, "Choose your attack:\n" + options);
+
+        // Parse and return the choice as an integer
+        try 
         {
-            case "light":
-                damage = player.getLightAttackDamage();
-                scenarioTextArea.append("You used a light attack! It dealt " + damage + " damage.\n");
-                enemy.takeDamage(damage);
-                break;
-            case "heavy":
-                if (rand.nextInt(3) < 2) 
-                {
-                    damage = player.getHeavyAttackDamage();
-                    scenarioTextArea.append("You used a heavy attack! It dealt " + damage + " damage.\n");
-                    enemy.takeDamage(damage);
-                } 
-                else 
-                {
-                    scenarioTextArea.append("The heavy attack missed!\n");
-                }
-                break;
-            case "special":
-                if (rand.nextBoolean()) 
-                {
-                    damage = player.getEquippedItem() != null ? player.getEquippedItem().getAttackBonus() * 2 : player.getMaxAttack();
-                    scenarioTextArea.append("You used a special attack! It dealt " + damage + " damage.\n");
-                    enemy.takeDamage(damage);
-                } 
-                else 
-                {
-                    scenarioTextArea.append("The special attack missed!\n");
-                }
-                break;
-        }
-    }
-
-    private void enemyAttackSequence() 
-    {
-        SwingUtilities.invokeLater(() -> 
-        { // Ensure UI update happens on the EDT
-            String enemyAttack = enemy.generateEnemyAttack();
-            scenarioTextArea.append(enemyAttack + "\n");
-
-            int dodgeChoice = getDodgeChoice();
-            int playerDamage = dodgeOutcome(dodgeChoice, enemyAttack);
-
-            if (playerDamage > 0) 
+            int choice = Integer.parseInt(input);
+            if (choice >= 1 && choice <= 3) 
             {
-                scenarioTextArea.append("You take " + playerDamage + " damage!\n");
-                player.loseHP(playerDamage);
+                return choice; // Valid choice
             } 
             else 
             {
-                scenarioTextArea.append("You dodged the attack!\n");
+                scenarioTextArea.append("Invalid choice. Please choose again.\n");
+                return getPlayerChoice(); // Recursively ask again
             }
-
-            if (!player.isAlive()) 
-            {
-                scenarioTextArea.append("Game Over! You have been defeated.\n");
-            }
-        });
+        } 
+        catch (NumberFormatException e) 
+        {
+            scenarioTextArea.append("Invalid input. Please enter a number.\n");
+            return getPlayerChoice(); // Recursively ask again
+        }
     }
-
-    private int getPlayerChoice() 
-    {
-        String options = "1. Light Attack.\n2. Heavy Attack.\n3. Special Attack.";
-        String input = JOptionPane.showInputDialog(null, "How would you like to attack the " + enemy.getName() + "?\n" + options);
-        return parseChoice(input);
-    }
-
+    
     private int getDodgeChoice() 
     {
-        String options = "1. Jump back\n2. Side step\n3. Block attack";
-        String input = JOptionPane.showInputDialog(null, "How would you like to dodge this attack?\n" + options);
-        return parseChoice(input);
-    }
+        // Display dodge options for the player
+        String options = "1. Jump Back\n2. Side Step\n3. Block";
+        String input = JOptionPane.showInputDialog(null, "Choose your dodge move:\n" + options);
 
-    private int parseChoice(String input) 
-    {
-        if (input != null) 
+        // Parse and return the choice as an integer
+        try 
         {
-            try 
-            {
-                int choice = Integer.parseInt(input);
-                if (choice >= 1 && choice <= 3) 
-                {
-                    return choice;
-                }
+            int choice = Integer.parseInt(input);
+            if (choice >= 1 && choice <= 3) {
+                return choice; // Valid choice
             } 
-            catch (NumberFormatException e) 
+            else 
             {
-                // Handle number format exception if input is not a valid integer
+                scenarioTextArea.append("Invalid choice. Please choose again.\n");
+                return getDodgeChoice(); // Recursively ask again
             }
+        } 
+        catch (NumberFormatException e) {
+            scenarioTextArea.append("Invalid input. Please enter a number.\n");
+            return getDodgeChoice(); // Recursively ask again
         }
-        return -1; // Return an invalid choice
     }
 
-    private int dodgeOutcome(int dodgeChoice, String enemyAttack) {
-        int enemyDamage = enemy.getAttackDamage();
-        int damageTaken = 0;
-
-        switch (dodgeChoice) {
-            case 1: // Jump back
-                if (enemyAttack.contains("kick")) {
-                    scenarioTextArea.append("You jump back and avoid the kick!\n");
-                } else if (enemyAttack.contains("punch")) {
-                    scenarioTextArea.append("You jump back but the punch still connects! You take reduced damage.\n");
-                    damageTaken = (enemyDamage + 2) / 3;
-                } else if (enemyAttack.contains("weapon")) {
-                    scenarioTextArea.append("You jump back but the weapon still grazes you! You take reduced damage.\n");
-                    damageTaken = (enemyDamage + 1) / 2;
-                }
-                break;
-
-            case 2: // Side step
-                if (enemyAttack.contains("kick")) {
-                    scenarioTextArea.append("You side step but the kick still connects! You take reduced damage.\n");
-                    damageTaken = (enemyDamage + 2) / 3;
-                } else if (enemyAttack.contains("punch")) {
-                    scenarioTextArea.append("You side step but the punch still hits! You take full damage.\n");
-                    damageTaken = enemyDamage;
-                } else if (enemyAttack.contains("weapon")) {
-                    scenarioTextArea.append("You side step the overarm slash and fully dodge the attack!\n");
-                }
-                break;
-
-            case 3: // Block attack
-                if (enemyAttack.contains("kick")) {
-                    scenarioTextArea.append("You try to block the kick! The kick still hits but reduced damage is taken.\n");
-                    damageTaken = (enemyDamage + 2) / 3;
-                } else if (enemyAttack.contains("punch")) {
-                    scenarioTextArea.append("You block the punch and take no damage!\n");
-                } else if (enemyAttack.contains("weapon")) {
-                    scenarioTextArea.append("You try to block the weapon attack! The weapon still hits and full damage is dealt.\n");
-                    damageTaken = enemyDamage;
-                }
-                break;
-
+    private AttackType selectAttackType(int choice) 
+    {
+        switch (choice) 
+        {
+            case 1:
+                return new LightAttack();
+            case 2:
+                return new HeavyAttack();
+            case 3:
+                return new SpecialAttack();
             default:
-                scenarioTextArea.append("Invalid choice.\n");
-                break;
+                throw new IllegalArgumentException("Invalid attack choice");
         }
+    }
+    
+    //Executes the enemy's attack sequence, allowing the player to choose a dodge type.
+    private void enemyAttackSequence() 
+    {
+        String enemyAttack = enemy.generateEnemyAttack();
+        scenarioTextArea.append(enemyAttack + "\n"); // Display enemy's attack
 
-        return damageTaken;
+        // Select the player's dodge type based on choice
+        DodgeType dodgeType = selectDodgeType(getDodgeChoice());
+        int damageTaken = dodgeType.dodge(player, enemy, enemyAttack, scenarioTextArea);
+
+        // Apply damage to the player if the dodge was unsuccessful
+        if (damageTaken > 0) 
+        {
+            scenarioTextArea.append("You take " + damageTaken + " damage!\n");
+            player.loseHP(damageTaken);
+        } 
+        else 
+        {
+            scenarioTextArea.append("You dodged the attack!\n");
+        }
+    }
+
+   private DodgeType selectDodgeType(int choice) 
+   {
+        switch (choice) 
+        {
+            case 1:
+                return new JumpBack();
+            case 2:
+                return new SideStep();
+            case 3:
+                return new Block();
+            default:
+                throw new IllegalArgumentException("Invalid dodge choice");
+        }
+    }
+
+    private void displayHealthStatus() 
+    {
+        scenarioTextArea.append("You attack the " + enemy.getName() + "!\n");
+        scenarioTextArea.append("Player HP: " + player.getHp() + ", Enemy HP: " + enemy.getHp() + "\n");
     }
 }
