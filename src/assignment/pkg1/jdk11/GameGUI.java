@@ -201,7 +201,7 @@ public class GameGUI extends JFrame
             option2Button.setText(option2);
             option3Button.setText(option3);
 
-            bossButton.setVisible(Enemy.isBossUnlocked() && !Enemy.isBossDefeated());
+            bossButton.setVisible(EnemyFactory.isBossUnlocked() && !EnemyFactory.isBossDefeated());
         } 
         catch (IOException e) 
         {
