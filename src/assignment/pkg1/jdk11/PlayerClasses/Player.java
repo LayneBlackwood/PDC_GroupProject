@@ -2,10 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package assignment.pkg1.jdk11;
+package assignment.pkg1.jdk11.PlayerClasses;
 
-import java.util.Random;
-import javax.swing.JOptionPane;
+import assignment.pkg1.jdk11.GameClasses.GameController;
+import assignment.pkg1.jdk11.GameClasses.GameGUI;
 
 /**
  *

@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package assignment.pkg1.jdk11;
+package assignment.pkg1.jdk11.EnemyClasses;
 
+import assignment.pkg1.jdk11.PlayerClasses.Player;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

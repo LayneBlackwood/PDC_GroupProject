@@ -2,8 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package assignment.pkg1.jdk11;
+package assignment.pkg1.jdk11.GameClasses;
 
+import assignment.pkg1.jdk11.CombatClasses.FightEnemyAction;
+import assignment.pkg1.jdk11.EnemyClasses.Enemy;
+import assignment.pkg1.jdk11.EnemyClasses.EnemyFactory;
+import assignment.pkg1.jdk11.PlayerClasses.Player;
 import java.util.Random;
 import javax.swing.SwingWorker;
 
@@ -47,7 +51,7 @@ public class GameController
         {
             endGame();
         }
-        currentEnemy = EnemyFactory.generateEnemy(player);
+        currentEnemy = (Enemy) EnemyFactory.generateEnemy(player);
         gameGUI.appendText("\nYou chose to attack the " + currentEnemy.getName() + "!");
         fightEnemy();
         player.gainEvilXP(10);
@@ -67,7 +71,7 @@ public class GameController
         else 
         {
             gameGUI.appendText("\nYou failed to escape and must fight!");
-            currentEnemy = EnemyFactory.generateEnemy(player);
+            currentEnemy = (Enemy) EnemyFactory.generateEnemy(player);
             fightEnemy();
         }
         player.gainNeutralXP(10);
