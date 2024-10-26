@@ -11,50 +11,56 @@ import java.util.Map;
  *
  * @author jackson and layne
  */
-public class Inventory
+
+public class Inventory 
 {
     private Map<String, Integer> items;
     private Map<String, LootItem> lootItems;
 
-    public Inventory()
+    public Inventory() 
     {
-        items = new HashMap<>(); //initializing hashmaps
+        items = new HashMap<>(); // Initializing hashmaps
         lootItems = new HashMap<>();
     }
-    public void addItem(String itemName, int quantity) //command to add item to inventory
-    {
+    
+    // Command to add item to inventory
+    public void addItem(String itemName, int quantity) 
+    { 
         items.put(itemName, items.getOrDefault(itemName, 0) + quantity);
     }
-
-
-    public boolean useItem(String itemName) //command to use the item
-    {
-        if(items.containsKey(itemName) && items.get(itemName) > 0)
-        {
+    
+    // Command to use the item
+    public boolean useItem(String itemName) 
+    { 
+        if (items.containsKey(itemName) && items.get(itemName) > 0) {
             items.put(itemName, items.get(itemName) - 1);
             return true;
         }
         return false;
     }
     
-    public void addLootItem(LootItem lootItem) //command to add loot item
-    {
+    // Command to add loot item
+    public void addLootItem(LootItem lootItem) 
+    { 
         lootItems.put(lootItem.getName(), lootItem);
     }
     
-    public LootItem getLootItem(String itemName) //command to return what the loot items name is
-    {
+    // Command to return the loot item by name
+    public LootItem getLootItem(String itemName) 
+    { 
         return lootItems.get(itemName);
     }
     
-    public int getItemQuantity(String itemName) //command to return the quantity of that item
-    {
+    // Command to return the quantity of that item
+    public int getItemQuantity(String itemName) 
+    { 
         return items.getOrDefault(itemName, 0);
     }
     
-    public boolean removeItem(String itemName) //command to remove item from inventory
-    {
-        if(items.containsKey(itemName) && items.get(itemName) > 0)
+    // Command to remove item from inventory
+    public boolean removeItem(String itemName) 
+    { 
+        if (items.containsKey(itemName) && items.get(itemName) > 0) 
         {
             items.put(itemName, items.get(itemName) - 1);
             return true;
@@ -62,3 +68,4 @@ public class Inventory
         return false;
     }
 }
+

@@ -8,6 +8,7 @@ package assignment.pkg1.jdk11;
  *
  * @author jackson and layne
  */
+
 public class LootItem 
 {
     String name;

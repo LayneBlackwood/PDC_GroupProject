@@ -14,11 +14,6 @@ import javax.swing.*;
  * @author jackson and layne
  */
 
-
-
-
-
-
 public class FightEnemyAction 
 {
     

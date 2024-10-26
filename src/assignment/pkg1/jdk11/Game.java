@@ -4,11 +4,10 @@
  */
 package assignment.pkg1.jdk11;
 
-//hi
-//hello
-//trying something else uno momento please
-//???
-//just one more check in please let me know if this works
+/**
+ *
+ * @author jackson and layne
+ */
 
 import javax.swing.*;
 

@@ -26,7 +26,7 @@ public class GameController
 
     public void startGame(String playerName) 
     {
-        this.player = new Player(playerName, gameGUI);
+        this.player = new Player(playerName, gameGUI, this);
         gameGUI.initializeGameForPlayer();
     }
     
@@ -34,6 +34,11 @@ public class GameController
     public String getPlayerName() 
     {
         return player != null ? player.getName() : "Unknown Player";
+    }
+
+    public Player getPlayer() 
+    {
+        return player;
     }    
     
     public void handleOption1() 
