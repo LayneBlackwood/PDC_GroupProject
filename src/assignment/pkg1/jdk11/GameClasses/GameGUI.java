@@ -7,7 +7,9 @@ package assignment.pkg1.jdk11.GameClasses;
 import assignment.pkg1.jdk11.EnemyClasses.EnemyFactory;
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  *
@@ -26,13 +28,9 @@ public class GameGUI extends JFrame
 
     public GameGUI() 
     {
-        // Initialize controller
         gameController = new GameController(this);
-        
-        // Setup the GUI components
         setupUI();
         
-        // Attempt to open the scenario file here or when starting the game
         try 
         {
             scenarioReader = new BufferedReader(new FileReader("scenarios.txt"));
@@ -40,7 +38,7 @@ public class GameGUI extends JFrame
         catch (IOException e) 
         {
             JOptionPane.showMessageDialog(this, "Error loading scenarios: " + e.getMessage());
-            scenarioReader = null;  // Set to null if loading fails
+            scenarioReader = null;
         }
     }
 
@@ -51,7 +49,6 @@ public class GameGUI extends JFrame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // Initialize Components
         scenarioTextArea = new JTextArea(10, 50);
         scenarioTextArea.setEditable(false);
         scenarioTextArea.setLineWrap(true);
@@ -97,7 +94,6 @@ public class GameGUI extends JFrame
         quitButton = new JButton("Quit");
         buttonPanel.add(quitButton);
 
-        // Set up action listeners
         setupListeners();
     }
 
@@ -132,14 +128,11 @@ public class GameGUI extends JFrame
         });
     }
     
-    // Method to initialize the game for the player
     public void initializeGameForPlayer() 
     {
-        // Hide name input components
         nameTextField.setVisible(false);
         confirmButton.setVisible(false);
 
-        // Show game components
         scenarioTextArea.setVisible(true);
         option1Button.setVisible(true);
         option2Button.setVisible(true);
@@ -147,13 +140,11 @@ public class GameGUI extends JFrame
         healthLabel.setVisible(true);
         xpLabel.setVisible(true);
 
-        // Display welcome message and load the first scenario
         appendText("Welcome, " + gameController.getPlayerName() + "! The game begins now...");
-        updatePlayerStats(100, 0); // Default initial values for health and XP
+        updatePlayerStats(100, 0); 
         loadNextScenario();
     }
 
-    // Method to display the player's score at the end of the game
     public void showScoreboard(String playerName, int xp, int health) 
     {
         StringBuilder scoreboard = new StringBuilder();
@@ -164,8 +155,7 @@ public class GameGUI extends JFrame
         JOptionPane.showMessageDialog(this, scoreboard.toString(), "Scoreboard", JOptionPane.INFORMATION_MESSAGE);
     }    
 
-    // Load the next scenario from the file
-    public void loadNextScenario() 
+           public void loadNextScenario() 
     {
         if (scenarioReader == null) 
         {
@@ -208,30 +198,32 @@ public class GameGUI extends JFrame
         }
     }
 
+    // Method to append text to the scenario text area
     public void appendText(String text) 
     {
         scenarioTextArea.append(text);
         scenarioTextArea.setCaretPosition(scenarioTextArea.getDocument().getLength());
     }
 
+    // Method to update the player's health and XP display
     public void updatePlayerStats(int health, int xp) 
     {
         healthLabel.setText("Health: " + health);
         xpLabel.setText("XP: " + xp);
     }
 
+    // Method to disable game option buttons
     public void disableGameOptions() 
     {
         option1Button.setEnabled(false);
         option2Button.setEnabled(false);
         option3Button.setEnabled(false);
+        bossButton.setEnabled(false);
     }
 
+    // Getter for scenario text area for use by other classes
     public JTextArea getScenarioTextArea() 
     {
         return scenarioTextArea;
     }
 }
-
-
-

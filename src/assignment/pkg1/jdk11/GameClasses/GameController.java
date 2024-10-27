@@ -17,6 +17,7 @@ import javax.swing.SwingWorker;
  */
 
 //Game actions are computed in this class
+
 public class GameController 
 {
     private final GameGUI gameGUI;
@@ -33,7 +34,7 @@ public class GameController
         this.player = new Player(playerName, gameGUI, this);
         gameGUI.initializeGameForPlayer();
     }
-    
+
     // Method to get the player's name
     public String getPlayerName() 
     {
@@ -51,7 +52,7 @@ public class GameController
         {
             endGame();
         }
-        currentEnemy = (Enemy) EnemyFactory.generateEnemy(player);
+        currentEnemy = EnemyFactory.generateEnemy(player);
         gameGUI.appendText("\nYou chose to attack the " + currentEnemy.getName() + "!");
         fightEnemy();
         player.gainEvilXP(10);
@@ -71,7 +72,7 @@ public class GameController
         else 
         {
             gameGUI.appendText("\nYou failed to escape and must fight!");
-            currentEnemy = (Enemy) EnemyFactory.generateEnemy(player);
+            currentEnemy = EnemyFactory.generateEnemy(player);
             fightEnemy();
         }
         player.gainNeutralXP(10);
@@ -98,45 +99,44 @@ public class GameController
 
     private void fightEnemy() 
     {
-    SwingWorker<Void, String> worker = new SwingWorker<>() 
-    {
-        @Override
-        protected Void doInBackground() throws Exception 
+        SwingWorker<Void, String> worker = new SwingWorker<>() 
         {
-            FightEnemyAction fight = new FightEnemyAction(player, currentEnemy, gameGUI.getScenarioTextArea());
-            fight.fightEnemy(); 
-            return null;
-        }
-
-        @Override
-        protected void done() 
-        {
-            try 
+            @Override
+            protected Void doInBackground() throws Exception 
             {
-                // Update the player's stats in the GUI after the fight
-                gameGUI.updatePlayerStats(player.getHp(), player.getTotalXP());
-
-                if (player.getHp() <= 0) 
-                {
-                    endGame();
-                } 
-                else if (currentEnemy.getHp() <= 0) 
-                {
-                    gameGUI.appendText("\nEnemy defeated!");
-                    gameGUI.loadNextScenario();
-                } 
-                else 
-                {
-                    gameGUI.appendText("\nEnemy HP: " + currentEnemy.getHp());
-                }
-            } 
-            catch (Exception ex) 
-            {
-                ex.printStackTrace();
+                FightEnemyAction fight = new FightEnemyAction(player, currentEnemy, gameGUI.getScenarioTextArea(), gameGUI);
+                fight.startFight(); // Start the fight with the updated event-driven approach
+                return null;
             }
-        }
-    };
-    worker.execute(); // Start the background task
+
+            @Override
+            protected void done() 
+            {
+                try 
+                {
+                    gameGUI.updatePlayerStats(player.getHp(), player.getTotalXP());
+
+                    if (player.getHp() <= 0) 
+                    {
+                        endGame();
+                    } 
+                    else if (currentEnemy.getHp() <= 0) 
+                    {
+                        gameGUI.appendText("\nEnemy defeated!");
+                        gameGUI.loadNextScenario();
+                    } 
+                    else 
+                    {
+                        gameGUI.appendText("\nEnemy HP: " + currentEnemy.getHp());
+                    }
+                } 
+                catch (Exception ex) 
+                {
+                    ex.printStackTrace();
+                }
+            }
+        };
+        worker.execute(); // Start the background task
     }
 
     private boolean attemptEscape() 

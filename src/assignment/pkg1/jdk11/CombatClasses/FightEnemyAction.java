@@ -6,6 +6,7 @@ package assignment.pkg1.jdk11.CombatClasses;
 
 
 import assignment.pkg1.jdk11.EnemyClasses.Enemy;
+import assignment.pkg1.jdk11.GameClasses.GameGUI;
 import assignment.pkg1.jdk11.PlayerClasses.Player;
 import javax.swing.*;
 
@@ -15,97 +16,145 @@ import javax.swing.*;
  */
 
 //FightEnemyAction coordinates the fight sequence between the player and the enemy, handling the flow of player attacks and enemy responses.
+
 public class FightEnemyAction 
 {
     private final Player player;
     private final Enemy enemy;
     private final JTextArea scenarioTextArea;
+    private final GameGUI gameGUI;
 
-    public FightEnemyAction(Player player, Enemy enemy, JTextArea scenarioTextArea) 
+    public FightEnemyAction(Player player, Enemy enemy, JTextArea scenarioTextArea, GameGUI gameGUI) 
     {
         this.player = player;
         this.enemy = enemy;
         this.scenarioTextArea = scenarioTextArea;
+        this.gameGUI = gameGUI;
     }
 
-   //Starts the fight sequence, alternating between player attacks and enemy responses.
-    public void fightEnemy() 
+    // Starts the fight sequence, alternating between player attacks and enemy responses.
+    public void startFight() 
     {
-        while (player.isAlive() && enemy.getHp() > 0) 
-        {
-            displayHealthStatus(); // Display current health of both player and enemy
+        displayHealthStatus(); // Display current health of both player and enemy
+        playerTurn(); // Start with the player's turn
+    }
 
-            // Get the player's chosen attack type and execute the attack
+    private void playerTurn() 
+    {
+        if (player.isAlive() && enemy.getHp() > 0) 
+        {
+            displayHealthStatus();
+
+            // Get player's attack type and execute it
             AttackType attackType = selectAttackType(getPlayerChoice());
+            if (attackType == null) {
+                exitFight(); // If player chose to exit the fight
+                return;
+            }
+
             attackType.execute(player, enemy, scenarioTextArea);
 
-            // Check if the enemy has been defeated
+            // Check if the enemy is defeated
             if (enemy.getHp() <= 0) 
             {
                 scenarioTextArea.append("The " + enemy.getName() + " has been defeated!\n");
                 player.gainEvilXP(enemy.getXP());
-                return; // Exit the fight after defeating the enemy
+                return; // End the fight after defeating the enemy
             }
 
-            // Enemy's turn to attack and player's turn to dodge
-            enemyAttackSequence();
+            // Proceed to enemy's turn
+            enemyTurn();
         }
+    }
 
-        // Check if the player has been defeated
+    private void enemyTurn() 
+    {
         if (!player.isAlive()) 
         {
             scenarioTextArea.append("Game Over! You have been defeated.\n");
+            return;
         }
+
+        // Enemy's attack
+        String enemyAttack = enemy.generateEnemyAttack();
+        scenarioTextArea.append(enemyAttack + "\n");
+
+        // Choose dodge type
+        DodgeType dodgeType = selectDodgeType(getDodgeChoice());
+        int damageTaken = dodgeType.dodge(player, enemy, enemyAttack, scenarioTextArea);
+
+        // Apply damage
+        if (damageTaken > 0) 
+        {
+            scenarioTextArea.append("You take " + damageTaken + " damage!\n");
+            player.loseHP(damageTaken);
+        } 
+        else 
+        {
+            scenarioTextArea.append("You dodged the attack!\n");
+        }
+
+        // Return to player's turn
+        playerTurn();
     }
-    
+
     private int getPlayerChoice() 
     {
-        // Display options for the player
-        String options = "1. Light Attack\n2. Heavy Attack\n3. Special Attack";
-        String input = JOptionPane.showInputDialog(null, "Choose your attack:\n" + options);
+        // Define options for the attack dialog
+        Object[] options = {"Light Attack", "Heavy Attack", "Special Attack", "Exit Fight"};
+        
+        // Show the attack options dialog with the additional "Exit Fight" button
+        int choice = JOptionPane.showOptionDialog(
+            null, 
+            "Choose your attack:", 
+            "Attack Options", 
+            JOptionPane.DEFAULT_OPTION, 
+            JOptionPane.PLAIN_MESSAGE, 
+            null, 
+            options, 
+            options[0]
+        );
 
-        // Parse and return the choice as an integer
-        try 
+        switch (choice) 
         {
-            int choice = Integer.parseInt(input);
-            if (choice >= 1 && choice <= 3) 
-            {
-                return choice; // Valid choice
-            } 
-            else 
-            {
+            case 0:
+                return 1; // Light Attack
+            case 1:
+                return 2; // Heavy Attack
+            case 2:
+                return 3; // Special Attack
+            case 3:
+                return -1; // Exit Fight
+            default:
                 scenarioTextArea.append("Invalid choice. Please choose again.\n");
-                return getPlayerChoice(); // Recursively ask again
-            }
-        } 
-        catch (NumberFormatException e) 
-        {
-            scenarioTextArea.append("Invalid input. Please enter a number.\n");
-            return getPlayerChoice(); // Recursively ask again
+                return getPlayerChoice();
         }
     }
-    
+
     private int getDodgeChoice() 
     {
-        // Display dodge options for the player
-        String options = "1. Jump Back\n2. Side Step\n3. Block";
-        String input = JOptionPane.showInputDialog(null, "Choose your dodge move:\n" + options);
+        // Define options for the dodge dialog
+        Object[] options = {"Jump Back", "Side Step", "Block"};
+        
+        // Show the dodge options dialog
+        int choice = JOptionPane.showOptionDialog(
+            null, 
+            "Choose your dodge move:", 
+            "Dodge Options", 
+            JOptionPane.DEFAULT_OPTION, 
+            JOptionPane.PLAIN_MESSAGE, 
+            null, 
+            options, 
+            options[0]
+        );
 
-        // Parse and return the choice as an integer
-        try 
+        if (choice >= 0 && choice <= 2) 
         {
-            int choice = Integer.parseInt(input);
-            if (choice >= 1 && choice <= 3) {
-                return choice; // Valid choice
-            } 
-            else 
-            {
-                scenarioTextArea.append("Invalid choice. Please choose again.\n");
-                return getDodgeChoice(); // Recursively ask again
-            }
+            return choice + 1; // Valid choices 1, 2, 3 for dodge moves
         } 
-        catch (NumberFormatException e) {
-            scenarioTextArea.append("Invalid input. Please enter a number.\n");
+        else 
+        {
+            scenarioTextArea.append("Invalid choice. Please choose again.\n");
             return getDodgeChoice(); // Recursively ask again
         }
     }
@@ -120,35 +169,15 @@ public class FightEnemyAction
                 return new HeavyAttack();
             case 3:
                 return new SpecialAttack();
+            case -1:
+                return null; // Exit Fight chosen
             default:
                 throw new IllegalArgumentException("Invalid attack choice");
         }
     }
-    
-    //Executes the enemy's attack sequence, allowing the player to choose a dodge type.
-    private void enemyAttackSequence() 
+
+    private DodgeType selectDodgeType(int choice) 
     {
-        String enemyAttack = enemy.generateEnemyAttack();
-        scenarioTextArea.append(enemyAttack + "\n"); // Display enemy's attack
-
-        // Select the player's dodge type based on choice
-        DodgeType dodgeType = selectDodgeType(getDodgeChoice());
-        int damageTaken = dodgeType.dodge(player, enemy, enemyAttack, scenarioTextArea);
-
-        // Apply damage to the player if the dodge was unsuccessful
-        if (damageTaken > 0) 
-        {
-            scenarioTextArea.append("You take " + damageTaken + " damage!\n");
-            player.loseHP(damageTaken);
-        } 
-        else 
-        {
-            scenarioTextArea.append("You dodged the attack!\n");
-        }
-    }
-
-   private DodgeType selectDodgeType(int choice) 
-   {
         switch (choice) 
         {
             case 1:
@@ -164,7 +193,13 @@ public class FightEnemyAction
 
     private void displayHealthStatus() 
     {
-        scenarioTextArea.append("You attack the " + enemy.getName() + "!\n");
         scenarioTextArea.append("Player HP: " + player.getHp() + ", Enemy HP: " + enemy.getHp() + "\n");
+    }
+
+    // Exit fight method to handle exit logic
+    private void exitFight() 
+    {
+        scenarioTextArea.append("You have exited the fight.\n");
+        gameGUI.loadNextScenario(); // Load the next scenario or return to main screen as desired
     }
 }
