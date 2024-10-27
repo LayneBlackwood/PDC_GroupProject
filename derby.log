@@ -1,0 +1,37 @@
+Mon Oct 28 12:18:47 NZDT 2024 : Apache Derby Network Server - 10.14.2.0 - (1828579) started and ready to accept connections on port 1527
+----------------------------------------------------------------
+Mon Oct 28 12:22:05 NZDT 2024:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0192-d046-63fd-000009c4a54d 
+on database directory C:\Users\layne\OneDrive - AUT University\Software design and construction\assignment 1 - group project\Assignment 1 - JDK 11\Assignment 1 - JDK11\Game_Database with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@30946e09 
+Loaded from file:/C:/Users/layne/OneDrive%20-%20AUT%20University/Software%20design%20and%20construction/db-derby-10.14.2.0-bin/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=11.0.23+7-LTS-222
+user.dir=C:\Users\layne\OneDrive - AUT University\Software design and construction\db-derby-10.14.2.0-bin
+os.name=Windows 11
+os.arch=amd64
+os.version=10.0
+derby.system.home=C:\Users\layne\OneDrive - AUT University\Software design and construction\assignment 1 - group project\Assignment 1 - JDK 11\Assignment 1 - JDK11
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Mon Oct 28 12:22:06 NZDT 2024:
+Shutting down instance a816c00e-0192-d046-63fd-000009c4a54d on database directory C:\Users\layne\OneDrive - AUT University\Software design and construction\assignment 1 - group project\Assignment 1 - JDK 11\Assignment 1 - JDK11\Game_Database with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@30946e09 
+Mon Oct 28 12:22:06 NZDT 2024 Thread[DRDAConnThread_3,5,main] (DATABASE = Game_Database), (DRDAID = {2}), Database 'Game_Database' shutdown.
+----------------------------------------------------------------
+Mon Oct 28 12:22:20 NZDT 2024:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 6ede40af-0192-d046-63fd-000009c4a54d 
+on database directory C:\Users\layne\OneDrive - AUT University\Software design and construction\assignment 1 - group project\Assignment 1 - JDK 11\Assignment 1 - JDK11\Game_Database with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@30946e09 
+Loaded from file:/C:/Users/layne/OneDrive%20-%20AUT%20University/Software%20design%20and%20construction/db-derby-10.14.2.0-bin/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=11.0.23+7-LTS-222
+user.dir=C:\Users\layne\OneDrive - AUT University\Software design and construction\db-derby-10.14.2.0-bin
+os.name=Windows 11
+os.arch=amd64
+os.version=10.0
+derby.system.home=C:\Users\layne\OneDrive - AUT University\Software design and construction\assignment 1 - group project\Assignment 1 - JDK 11\Assignment 1 - JDK11
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Mon Oct 28 12:56:24 NZDT 2024: Shutting down Derby engine
+----------------------------------------------------------------
+Mon Oct 28 12:56:24 NZDT 2024:
+Shutting down instance 6ede40af-0192-d046-63fd-000009c4a54d on database directory C:\Users\layne\OneDrive - AUT University\Software design and construction\assignment 1 - group project\Assignment 1 - JDK 11\Assignment 1 - JDK11\Game_Database with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@30946e09 
+----------------------------------------------------------------

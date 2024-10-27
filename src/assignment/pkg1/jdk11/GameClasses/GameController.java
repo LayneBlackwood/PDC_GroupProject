@@ -4,6 +4,7 @@
  */
 package assignment.pkg1.jdk11.GameClasses;
 
+import assignment.pkg1.jdk11.CombatClasses.DatabaseClasses.DatabaseManager;
 import assignment.pkg1.jdk11.CombatClasses.FightEnemyAction;
 import assignment.pkg1.jdk11.EnemyClasses.Enemy;
 import assignment.pkg1.jdk11.EnemyClasses.EnemyFactory;
@@ -27,6 +28,7 @@ public class GameController
     public GameController(GameGUI gameGUI) 
     {
         this.gameGUI = gameGUI;
+        DatabaseManager.createTables();
     }
 
     public void startGame(String playerName) 
@@ -148,5 +150,17 @@ public class GameController
     {
         gameGUI.disableGameOptions();
         gameGUI.showScoreboard(player.getName(), player.getTotalXP(), player.getHp());
+    }
+    
+    public void saveProgress() {
+        DatabaseManager.savePlayer(player);
+    }
+
+    public void saveHighScore() {
+        DatabaseManager.saveHighScore(player.getName(), player.getTotalXP());
+    }
+
+    public void showHighScores() {
+        DatabaseManager.displayHighScores();
     }
 }

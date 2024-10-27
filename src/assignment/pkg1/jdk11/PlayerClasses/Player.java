@@ -40,6 +40,10 @@ public class Player
         inventory.addItem("Healing potion", 4); // Initial inventory setup
     }
 
+    public Player(String name, int hp, int xp) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
     // Notify LootChest whenever experience is gained and check for loot
     public void gainGoodXP(int xp) 
     {
