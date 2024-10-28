@@ -11,6 +11,7 @@ import java.sql.SQLException;
  *
  * @author jackson and layne
  */
+
 public class DatabaseManagerTest 
 {
     public static void main(String[] args) 
@@ -19,8 +20,18 @@ public class DatabaseManagerTest
         try 
         {
             dbManager.connect();
-            dbManager.createTables(); 
-            System.out.println("Tables checked/created successfully.");
+            dbManager.createTables();
+
+            // Add test data
+            dbManager.addPlayer("Alice", 100, 500);
+            dbManager.addPlayer("Bob", 120, 300);
+            dbManager.addHighScore("Alice", 1500);
+            dbManager.addHighScore("Bob", 1200);
+
+            // Display data
+            dbManager.displayPlayers();
+            dbManager.displayHighScores();
+
             dbManager.disconnect();
         } 
         catch (SQLException e) 

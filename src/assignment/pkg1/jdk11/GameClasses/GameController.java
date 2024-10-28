@@ -12,6 +12,7 @@ import assignment.pkg1.jdk11.PlayerClasses.Player;
 import java.util.Random;
 import javax.swing.SwingWorker;
 import java.sql.SQLException;
+import java.util.List;
 
 
 /**
@@ -167,16 +168,88 @@ public class GameController
         gameGUI.disableGameOptions();
         gameGUI.showScoreboard(player.getName(), player.getTotalXP(), player.getHp());
     }
-//    
-//    public void saveProgress() {
-//        DatabaseManager.savePlayer(player);
-//    }
-//
-//    public void saveHighScore() {
-//        DatabaseManager.saveHighScore(player.getName(), player.getTotalXP());
-//    }
-//
-//    public void showHighScores() {
-//        DatabaseManager.displayHighScores();
-//    }
+    
+    //Starts a new game session, adding a new player entry in the database.
+    public void startGame(String playerName, int playerHp, int playerXp) 
+    {
+        try 
+        {
+            dbManager.connect();
+            dbManager.addPlayer(playerName, playerHp, playerXp); // Adds player to the database
+            System.out.println("Player added to the database.");
+            dbManager.disconnect();
+        }
+        catch (SQLException e) 
+        {
+            e.printStackTrace();
+        }
+        // Continue with other game start logic as needed
+    }
+    
+    //displays all players and high scores from the database.
+    public void displayAllPlayersAndScores() 
+    {
+        try 
+        {
+            dbManager.connect();
+            System.out.println("Players:");
+            dbManager.displayPlayers(); // Displays all players
+            System.out.println("\nHigh Scores:");
+            dbManager.displayHighScores(); // Displays all high scores
+            dbManager.disconnect();
+        } 
+        catch (SQLException e) 
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    //Saves the final score of the player to the HighScores table
+    public void saveScore(String playerName, int score) 
+    {
+        try 
+        {
+            dbManager.connect();
+            dbManager.addHighScore(playerName, score); // Adds player's final score to HighScores
+            System.out.println("Score saved in HighScores table.");
+            dbManager.disconnect();
+        } 
+        catch (SQLException e) 
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    //Ends the game, saves the player's final score, and displays all players and high scores.
+    public void endGame(int finalScore) 
+    {
+        if (player != null) 
+        {
+            saveScore(player.getName(), finalScore); // Save the player’s final score
+        }
+        displayAllPlayersAndScores(); // Display leaderboard and player history
+        // Additional game-ending logic if necessary
+    }
+    
+    public void displayExistingPlayers() 
+    {
+        try 
+        {
+            dbManager.connect();
+            List<String> players = dbManager.getPlayers();
+
+            System.out.println("Existing Players:");
+            for (String player : players) 
+            {
+                System.out.println(player);
+            }
+
+            dbManager.disconnect();
+        } 
+        catch (SQLException e) 
+        {
+            e.printStackTrace();
+        }
+    }
+
 }
