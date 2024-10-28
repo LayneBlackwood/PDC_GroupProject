@@ -4,13 +4,15 @@
  */
 package assignment.pkg1.jdk11.GameClasses;
 
-import assignment.pkg1.jdk11.CombatClasses.DatabaseClasses.DatabaseManager;
 import assignment.pkg1.jdk11.CombatClasses.FightEnemyAction;
+import assignment.pkg1.jdk11.DatabaseClasses.DatabaseManager;
 import assignment.pkg1.jdk11.EnemyClasses.Enemy;
 import assignment.pkg1.jdk11.EnemyClasses.EnemyFactory;
 import assignment.pkg1.jdk11.PlayerClasses.Player;
 import java.util.Random;
 import javax.swing.SwingWorker;
+import java.sql.SQLException;
+
 
 /**
  *
@@ -24,11 +26,25 @@ public class GameController
     private final GameGUI gameGUI;
     private Player player;
     private Enemy currentEnemy;
+    private DatabaseManager dbManager; 
 
     public GameController(GameGUI gameGUI) 
     {
         this.gameGUI = gameGUI;
-        DatabaseManager.createTables();
+        
+        this.dbManager = new DatabaseManager();
+        
+        try 
+        {
+            dbManager.connect();
+            dbManager.createTables(); // Call createTables on the instance
+            dbManager.disconnect();
+        } 
+        catch (SQLException e) 
+        {
+            e.printStackTrace();
+        }
+        
     }
 
     public void startGame(String playerName) 
@@ -151,16 +167,16 @@ public class GameController
         gameGUI.disableGameOptions();
         gameGUI.showScoreboard(player.getName(), player.getTotalXP(), player.getHp());
     }
-    
-    public void saveProgress() {
-        DatabaseManager.savePlayer(player);
-    }
-
-    public void saveHighScore() {
-        DatabaseManager.saveHighScore(player.getName(), player.getTotalXP());
-    }
-
-    public void showHighScores() {
-        DatabaseManager.displayHighScores();
-    }
+//    
+//    public void saveProgress() {
+//        DatabaseManager.savePlayer(player);
+//    }
+//
+//    public void saveHighScore() {
+//        DatabaseManager.saveHighScore(player.getName(), player.getTotalXP());
+//    }
+//
+//    public void showHighScores() {
+//        DatabaseManager.displayHighScores();
+//    }
 }

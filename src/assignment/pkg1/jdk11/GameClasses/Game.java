@@ -20,7 +20,7 @@ public class Game
         
         // Make the GUI visible
         SwingUtilities.invokeLater(new Runnable() 
-        {
+        { 
             @Override
             public void run() 
             {
