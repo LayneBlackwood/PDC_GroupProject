@@ -19,29 +19,36 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseManager {
+public class DatabaseManager 
+{
     private static final String DB_URL = "jdbc:derby:game_database;create=true";
     private Connection connection;
 
-    public void connect() throws SQLException {
+    public void connect() throws SQLException 
+    {
         connection = DriverManager.getConnection(DB_URL);
         connection.setAutoCommit(false); // Disable auto-commit for better transaction management
     }
 
-    public void disconnect() throws SQLException {
-        if (connection != null && !connection.isClosed()) {
+    public void disconnect() throws SQLException 
+    {
+        if (connection != null && !connection.isClosed()) 
+        {
             connection.close();
         }
     }
 
-    public void createTables() throws SQLException {
+    public void createTables() throws SQLException 
+    {
         DatabaseMetaData dbMetaData = connection.getMetaData();
         ResultSet tables;
 
         // Create Players table if it doesn't exist
         tables = dbMetaData.getTables(null, null, "PLAYERS", null);
-        if (!tables.next()) {
-            try (Statement stmt = connection.createStatement()) {
+        if (!tables.next()) 
+        {
+            try (Statement stmt = connection.createStatement()) 
+            {
                 String createPlayersTable = "CREATE TABLE Players (" +
                         "id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
                         "name VARCHAR(100) NOT NULL," +
@@ -56,8 +63,10 @@ public class DatabaseManager {
 
         // Create HighScores table if it doesn't exist
         tables = dbMetaData.getTables(null, null, "HIGHSCORES", null);
-        if (!tables.next()) {
-            try (Statement stmt = connection.createStatement()) {
+        if (!tables.next()) 
+        {
+            try (Statement stmt = connection.createStatement()) 
+            {
                 String createHighScoresTable = "CREATE TABLE HighScores (" +
                         "id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
                         "name VARCHAR(100) NOT NULL," +
@@ -71,20 +80,25 @@ public class DatabaseManager {
         tables.close();
     }
 
-    public void insertPlayer(String name, int hp, int xp) throws SQLException {
+    public void insertPlayer(String name, int hp, int xp) throws SQLException 
+    {
         String query = "INSERT INTO Players (name, hp, xp) VALUES (?, ?, ?)";
-        if (connection == null || connection.isClosed()) {
+        if (connection == null || connection.isClosed()) 
+        {
             throw new SQLException("Database connection is not established.");
         }
 
-        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) 
+        {
             pstmt.setString(1, name);
             pstmt.setInt(2, hp);
             pstmt.setInt(3, xp);
             pstmt.executeUpdate();
             connection.commit();  // Commit the transaction
             System.out.println("Player " + name + " inserted into Players table.");
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) 
+        {
             connection.rollback(); // Rollback if there's an error
             e.printStackTrace();
         }
@@ -98,7 +112,9 @@ public class DatabaseManager {
             pstmt.executeUpdate();
             connection.commit(); // Commit after insertion
             System.out.println("High score for " + name + " inserted into HighScores table.");
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) 
+        {
             connection.rollback(); // Rollback if there's an error
             e.printStackTrace();
         }

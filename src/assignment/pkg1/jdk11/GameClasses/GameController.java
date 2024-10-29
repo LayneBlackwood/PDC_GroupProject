@@ -23,26 +23,32 @@ import javax.swing.*;
 import java.sql.SQLException;
 import java.util.Random;
 
-public class GameController {
+public class GameController 
+{
     private final GameGUI gameGUI;
     private Player player;
     private Enemy currentEnemy;
     private final DatabaseManager dbManager;
 
-    public GameController(GameGUI gameGUI) {
+    public GameController(GameGUI gameGUI) 
+    {
         this.gameGUI = gameGUI;
         this.dbManager = new DatabaseManager();
         
-        try {
+        try 
+        {
             dbManager.connect();
             dbManager.createTables();
             dbManager.disconnect();
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) 
+        {
             e.printStackTrace();
         }
     }
 
-    public void startGame(String playerName) {
+    public void startGame(String playerName) 
+    {
         this.player = new Player(playerName, gameGUI, this);
         gameGUI.initializeGameForPlayer();
         savePlayerToDatabase();
@@ -161,27 +167,36 @@ public class GameController {
         showSummaryScreen();
     }
 
-    private void savePlayerToDatabase() {
-        try {
+    private void savePlayerToDatabase() 
+    {
+        try 
+        {
             dbManager.connect();
             dbManager.insertPlayer(player.getName(), player.getHp(), player.getTotalXP());
             dbManager.disconnect();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) 
+        {
             e.printStackTrace();
         }
     }
 
-    private void saveHighScoreToDatabase() {
-        try {
+    private void saveHighScoreToDatabase() 
+    {
+        try 
+        {
             dbManager.connect();
             dbManager.insertHighScore(player.getName(), player.getTotalXP());
             dbManager.disconnect();
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) 
+        {
             e.printStackTrace();
         }
     }
 
-    private void showSummaryScreen() {
+    private void showSummaryScreen() 
+    {
         SwingUtilities.invokeLater(() -> new SummaryScreen(dbManager));
     }
 }

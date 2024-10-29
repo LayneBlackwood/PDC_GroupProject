@@ -40,7 +40,8 @@ public class Player
         inventory.addItem("Healing potion", 4); // Initial inventory setup
     }
 
-    public Player(String name, int hp, int xp) {
+    public Player(String name, int hp, int xp) 
+    {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -71,9 +72,12 @@ public class Player
     public void loseHP(int damage) 
     {
         hp -= damage;
-        if (hp <= 0) {
+        if (hp <= 0) 
+        {
             gui.appendText("You have died.");
-        } else {
+        } 
+        else 
+        {
             gui.updatePlayerStats(hp, getTotalXP());
         }
     }

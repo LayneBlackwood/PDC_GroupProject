@@ -13,10 +13,12 @@ import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
 
-public class SummaryScreen extends JFrame {
+public class SummaryScreen extends JFrame 
+{
     private DatabaseManager dbManager;
 
-    public SummaryScreen(DatabaseManager dbManager) {
+    public SummaryScreen(DatabaseManager dbManager) 
+    {
         this.dbManager = dbManager;
         setTitle("Previous Players and High Scores");
         setSize(400, 300);
@@ -35,18 +37,23 @@ public class SummaryScreen extends JFrame {
         add(closeButton, BorderLayout.SOUTH);
     }
 
-    private void displayPlayersAndScores(JTextArea textArea) {
-        try {
+    private void displayPlayersAndScores(JTextArea textArea) 
+    {
+        try 
+        {
             dbManager.connect();
             List<String> players = dbManager.getPlayers();
             List<String> highScores = dbManager.getHighScores();
 
             textArea.setText("Players and High Scores:\n\n");
-            for (int i = 0; i < players.size(); i++) {
+            for (int i = 0; i < players.size(); i++) 
+            {
                 textArea.append(players.get(i) + " - " + (i < highScores.size() ? highScores.get(i) : "No score") + "\n");
             }
             dbManager.disconnect();
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) 
+        {
             textArea.setText("Error fetching data.");
             e.printStackTrace();
         }
