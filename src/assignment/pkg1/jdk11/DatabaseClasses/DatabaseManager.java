@@ -67,7 +67,6 @@ public class DatabaseManager
         }
     }
 
-
     // Create tables for Players and HighScores if they don't exist
     public void createTables() 
     {
@@ -86,7 +85,7 @@ public class DatabaseManager
                     "score INTEGER NOT NULL," +
                     "date TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
             stmt.executeUpdate(createHighScoresTable);
-            
+
             System.out.println("Tables created successfully.");
         } 
         catch (SQLException e) 
@@ -108,15 +107,15 @@ public class DatabaseManager
         String query = "INSERT INTO Players (name, hp, xp) VALUES (?, ?, ?)";
         try 
         {
-            connect(); // Connect to the database
-            connection.setAutoCommit(false); // Set auto-commit to false
+            connect();
+            connection.setAutoCommit(false);
             try (PreparedStatement pstmt = connection.prepareStatement(query)) 
             {
                 pstmt.setString(1, name);
                 pstmt.setInt(2, hp);
                 pstmt.setInt(3, xp);
                 pstmt.executeUpdate();
-                connection.commit(); // Commit the transaction
+                connection.commit();
                 System.out.println("Player " + name + " inserted into Players table.");
             }
         } 
@@ -124,7 +123,7 @@ public class DatabaseManager
         {
             try 
             {
-                connection.rollback(); // Roll back if there's an error
+                connection.rollback();
             } 
             catch (SQLException rollbackEx) 
             {
@@ -137,25 +136,8 @@ public class DatabaseManager
             disconnect();
         }
     }
-    
-    public void updatePlayer(String name, int finalHp, int finalXp) throws SQLException 
-    {
-        String query = "UPDATE Players SET hp = ?, xp = ? WHERE name = ?";
-        connect();
-        try (PreparedStatement pstmt = connection.prepareStatement(query)) 
-        {
-            pstmt.setInt(1, finalHp);
-            pstmt.setInt(2, finalXp);
-            pstmt.setString(3, name);
-            pstmt.executeUpdate();
-            System.out.println("Player " + name + "'s final data updated in Players table.");
-        } 
-        finally 
-        {
-            disconnect();
-        }
-    }
 
+    // Insert a high score into the HighScores table
     public void insertHighScore(String name, int score) 
     {
         String query = "INSERT INTO HighScores (name, score) VALUES (?, ?)";
@@ -190,18 +172,21 @@ public class DatabaseManager
         }
     }
 
-
     // Fetch all players from the Players table
     public List<String> getPlayers() 
     {
         List<String> players = new ArrayList<>();
-        String query = "SELECT name FROM Players";
-        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) 
+        String query = "SELECT name, hp, xp FROM Players";
+        try 
         {
             connect();
-            while (rs.next()) 
+            try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) 
             {
-                players.add(rs.getString("name"));
+                while (rs.next()) 
+                {
+                    String player = "Name: " + rs.getString("name") + ", HP: " + rs.getInt("hp") + ", XP: " + rs.getInt("xp");
+                    players.add(player);
+                }
             }
         } 
         catch (SQLException e) 
@@ -214,8 +199,7 @@ public class DatabaseManager
         }
         return players;
     }
-
-    // Fetch all high scores from the HighScores table
+    
     public List<String> getHighScores() 
     {
         List<String> highScores = new ArrayList<>();
@@ -237,5 +221,35 @@ public class DatabaseManager
             disconnect();
         }
         return highScores;
+    }
+    
+    public Connection getConnection() 
+    {
+        return connection;
+    }
+
+    public void updatePlayer(String name, int finalHp, int finalXp) 
+    {
+        String query = "UPDATE Players SET hp = ?, xp = ? WHERE name = ?";
+        try 
+        {
+            connect();
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) 
+            {
+                pstmt.setInt(1, finalHp);
+                pstmt.setInt(2, finalXp);
+                pstmt.setString(3, name);
+                pstmt.executeUpdate();
+                System.out.println("Player " + name + "'s final data updated in Players table.");
+            }
+        } 
+        catch (SQLException e) 
+        {
+            e.printStackTrace();
+        } 
+        finally 
+        {
+            disconnect();
+        }
     }
 }

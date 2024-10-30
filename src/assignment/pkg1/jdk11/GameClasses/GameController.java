@@ -6,7 +6,6 @@ package assignment.pkg1.jdk11.GameClasses;
 
 import assignment.pkg1.jdk11.CombatClasses.FightEnemyAction;
 import assignment.pkg1.jdk11.DatabaseClasses.DatabaseManager;
-import assignment.pkg1.jdk11.DatabaseClasses.SummaryScreen;
 import assignment.pkg1.jdk11.EnemyClasses.Enemy;
 import assignment.pkg1.jdk11.EnemyClasses.EnemyFactory;
 import assignment.pkg1.jdk11.PlayerClasses.Player;
@@ -51,10 +50,8 @@ public class GameController
     {
         this.player = new Player(playerName, gameGUI, this);
         gameGUI.initializeGameForPlayer();
-        savePlayerToDatabase();
     }
-    
-    //Method to get the player's name
+
     public String getPlayerName() 
     {
         return player != null ? player.getName() : "Unknown Player";
@@ -63,9 +60,9 @@ public class GameController
     public Player getPlayer() 
     {
         return player;
-    } 
-    
-        public void handleOption1() 
+    }
+
+    public void handleOption1() 
     {
         if (player.getHp() <= 0) 
         {
@@ -115,8 +112,8 @@ public class GameController
         }
         gameGUI.updatePlayerStats(player.getHp(), player.getTotalXP());
     }
-    
-        private void fightEnemy() 
+
+    private void fightEnemy() 
     {
         SwingWorker<Void, String> worker = new SwingWorker<>() 
         {
@@ -138,8 +135,7 @@ public class GameController
                     {
                         endGame();
                     } 
-                    else if (currentEnemy.getHp() <= 0) 
-                    {
+                    else if (currentEnemy.getHp() <= 0) {
                         gameGUI.appendText("\nEnemy defeated!");
                         gameGUI.loadNextScenario();
                     } 
@@ -148,7 +144,10 @@ public class GameController
                         gameGUI.appendText("\nEnemy HP: " + currentEnemy.getHp());
                     }
                 } 
-                catch (Exception ex) {}
+                catch (Exception ex) 
+                {
+                    ex.printStackTrace();
+                }
             }
         };
         worker.execute();
@@ -159,29 +158,30 @@ public class GameController
         return new Random().nextInt(100) < 70;
     }
 
-    private void endGame() 
+    public void endGame() 
     {
         gameGUI.disableGameOptions();
         gameGUI.showScoreboard(player.getName(), player.getTotalXP(), player.getHp());
+        saveFinalPlayerData();
         saveHighScoreToDatabase();
         showSummaryScreen();
     }
 
-    private void savePlayerToDatabase() 
+    public void saveFinalPlayerData() 
     {
         try 
         {
             dbManager.connect();
-            dbManager.insertPlayer(player.getName(), player.getHp(), player.getTotalXP());
+            dbManager.updatePlayer(player.getName(), player.getHp(), player.getTotalXP());
             dbManager.disconnect();
-        }
+        } 
         catch (SQLException e) 
         {
             e.printStackTrace();
         }
     }
 
-    private void saveHighScoreToDatabase() 
+    public void saveHighScoreToDatabase() 
     {
         try 
         {
@@ -194,23 +194,13 @@ public class GameController
             e.printStackTrace();
         }
     }
-    
-    public void saveFinalPlayerData() 
-    {
-        try 
-        {
-            dbManager.connect();
-            dbManager.updatePlayer(player.getName(), player.getHp(), player.getTotalXP()); // Only update at the end
-            dbManager.disconnect();
-        } 
-        catch (SQLException e) 
-        {
-            e.printStackTrace();
-        }
-    }
 
-    private void showSummaryScreen() 
+    public void showSummaryScreen() 
     {
-        SwingUtilities.invokeLater(() -> new SummaryScreen(dbManager));
+        SwingUtilities.invokeLater(() -> 
+        {
+            SummaryScreen summaryScreen = new SummaryScreen(dbManager);
+            summaryScreen.setVisible(true);
+        });
     }
 }

@@ -16,7 +16,8 @@ import java.io.IOException;
  * @author jackson and layne
  */
 
-//This class handles the "look" of the game and what the user sees on the GUI
+// This class handles the "look" of the game and what the user sees on the GUI
+
 public class GameGUI extends JFrame 
 {
     private GameController gameController;
@@ -137,10 +138,10 @@ public class GameGUI extends JFrame
         {
             case JOptionPane.YES_OPTION: // "Quit and Save Player"
                 gameController.saveFinalPlayerData(); // Ensures final player data is saved before quitting
-                System.exit(0);
+                gameController.showSummaryScreen();
                 break;
             case JOptionPane.NO_OPTION: // "Quit and Don't Save Player"
-                System.exit(0);
+                gameController.showSummaryScreen();
                 break;
             case JOptionPane.CANCEL_OPTION: // "Cancel"
                 // Do nothing, returning the player to the game
@@ -150,7 +151,6 @@ public class GameGUI extends JFrame
         }
     }
 
-    
     public void initializeGameForPlayer() 
     {
         nameTextField.setVisible(false);
@@ -178,7 +178,7 @@ public class GameGUI extends JFrame
         JOptionPane.showMessageDialog(this, scoreboard.toString(), "Scoreboard", JOptionPane.INFORMATION_MESSAGE);
     }    
 
-           public void loadNextScenario() 
+    public void loadNextScenario() 
     {
         if (scenarioReader == null) 
         {
@@ -221,21 +221,18 @@ public class GameGUI extends JFrame
         }
     }
 
-    // Method to append text to the scenario text area
     public void appendText(String text) 
     {
         scenarioTextArea.append(text);
         scenarioTextArea.setCaretPosition(scenarioTextArea.getDocument().getLength());
     }
 
-    // Method to update the player's health and XP display
     public void updatePlayerStats(int health, int xp) 
     {
         healthLabel.setText("Health: " + health);
         xpLabel.setText("XP: " + xp);
     }
 
-    // Method to disable game option buttons
     public void disableGameOptions() 
     {
         option1Button.setEnabled(false);
@@ -244,7 +241,6 @@ public class GameGUI extends JFrame
         bossButton.setEnabled(false);
     }
 
-    // Getter for scenario text area for use by other classes
     public JTextArea getScenarioTextArea() 
     {
         return scenarioTextArea;
