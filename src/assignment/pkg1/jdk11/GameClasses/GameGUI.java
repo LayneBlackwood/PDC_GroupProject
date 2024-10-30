@@ -7,9 +7,6 @@ package assignment.pkg1.jdk11.GameClasses;
 import assignment.pkg1.jdk11.EnemyClasses.EnemyFactory;
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 
 /**
  *
@@ -17,30 +14,26 @@ import java.io.IOException;
  */
 
 // This class handles the "look" of the game and what the user sees on the GUI
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class GameGUI extends JFrame 
 {
     private GameController gameController;
-    private JTextField nameTextField;
     private JTextArea scenarioTextArea;
     private JLabel healthLabel, xpLabel;
-    private JButton option1Button, option2Button, option3Button, bossButton, confirmButton, quitButton;
+    private JButton option1Button, option2Button, option3Button, bossButton, quitButton;
     private BufferedReader scenarioReader;
 
     public GameGUI() 
     {
         gameController = new GameController(this);
         setupUI();
-        
-        try 
-        {
-            scenarioReader = new BufferedReader(new FileReader("scenarios.txt"));
-        } 
-        catch (IOException e) 
-        {
-            JOptionPane.showMessageDialog(this, "Error loading scenarios: " + e.getMessage());
-            scenarioReader = null;
-        }
+
+        // Display the new player name entry dialog at the start of the game
+        PlayerNameEntry playerNameEntryDialog = new PlayerNameEntry(this, gameController);
+        playerNameEntryDialog.setVisible(true);
     }
 
     private void setupUI() 
@@ -72,18 +65,6 @@ public class GameGUI extends JFrame
 
         add(buttonPanel, BorderLayout.SOUTH);
 
-        JPanel inputPanel = new JPanel(new FlowLayout());
-        JLabel promptLabel = new JLabel("Enter your name: ");
-        inputPanel.add(promptLabel);
-
-        nameTextField = new JTextField(15);
-        inputPanel.add(nameTextField);
-
-        confirmButton = new JButton("Confirm");
-        inputPanel.add(confirmButton);
-
-        add(inputPanel, BorderLayout.NORTH);
-
         JPanel statsPanel = new JPanel(new GridLayout(2, 1));
         healthLabel = new JLabel("Health: ");
         xpLabel = new JLabel("XP: ");
@@ -100,26 +81,13 @@ public class GameGUI extends JFrame
 
     private void setupListeners() 
     {
-        confirmButton.addActionListener(e -> 
-        {
-            String playerName = nameTextField.getText().trim();
-            if (!playerName.isEmpty()) 
-            {
-                gameController.startGame(playerName);
-            } 
-            else 
-            {
-                JOptionPane.showMessageDialog(this, "Please enter a valid name.");
-            }
-        });
-
         option1Button.addActionListener(e -> gameController.handleOption1());
         option2Button.addActionListener(e -> gameController.handleOption2());
         option3Button.addActionListener(e -> gameController.handleOption3());
-        
+
         quitButton.addActionListener(e -> showCustomQuitDialog());
     }
-    
+
     private void showCustomQuitDialog() 
     {
         Object[] options = {"Quit and Save Player", "Quit and Don't Save Player", "Cancel"};
@@ -153,8 +121,16 @@ public class GameGUI extends JFrame
 
     public void initializeGameForPlayer() 
     {
-        nameTextField.setVisible(false);
-        confirmButton.setVisible(false);
+        try 
+        {
+            scenarioReader = new BufferedReader(new FileReader("scenarios.txt"));
+            System.out.println("Scenarios file loaded successfully."); // Debugging line
+        } 
+        catch (IOException e) 
+        {
+            JOptionPane.showMessageDialog(this, "Error loading scenarios: " + e.getMessage());
+            scenarioReader = null;
+        }
 
         scenarioTextArea.setVisible(true);
         option1Button.setVisible(true);
@@ -189,11 +165,14 @@ public class GameGUI extends JFrame
         try 
         {
             String title = scenarioReader.readLine();
+
+            // If we reached the end of the file, reset to the beginning
             if (title == null) 
             {
-                appendText("\nNo more scenarios available. The game is over.");
-                disableGameOptions();
-                return;
+                // Close and reopen the reader to reset it
+                scenarioReader.close();
+                scenarioReader = new BufferedReader(new FileReader("scenarios.txt"));
+                title = scenarioReader.readLine(); // Start from the beginning again
             }
 
             appendText("\n" + title + "\n");
@@ -221,6 +200,7 @@ public class GameGUI extends JFrame
         }
     }
 
+
     public void appendText(String text) 
     {
         scenarioTextArea.append(text);
@@ -246,3 +226,4 @@ public class GameGUI extends JFrame
         return scenarioTextArea;
     }
 }
+
