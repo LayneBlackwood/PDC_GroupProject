@@ -194,6 +194,20 @@ public class GameController
             e.printStackTrace();
         }
     }
+    
+    public void saveFinalPlayerData() 
+    {
+        try 
+        {
+            dbManager.connect();
+            dbManager.updatePlayer(player.getName(), player.getHp(), player.getTotalXP()); // Only update at the end
+            dbManager.disconnect();
+        } 
+        catch (SQLException e) 
+        {
+            e.printStackTrace();
+        }
+    }
 
     private void showSummaryScreen() 
     {

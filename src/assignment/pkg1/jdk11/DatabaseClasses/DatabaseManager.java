@@ -10,16 +10,11 @@ package assignment.pkg1.jdk11.DatabaseClasses;
  */
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,6 +131,24 @@ public class DatabaseManager
                 rollbackEx.printStackTrace();
             }
             e.printStackTrace();
+        } 
+        finally 
+        {
+            disconnect();
+        }
+    }
+    
+    public void updatePlayer(String name, int finalHp, int finalXp) throws SQLException 
+    {
+        String query = "UPDATE Players SET hp = ?, xp = ? WHERE name = ?";
+        connect();
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) 
+        {
+            pstmt.setInt(1, finalHp);
+            pstmt.setInt(2, finalXp);
+            pstmt.setString(3, name);
+            pstmt.executeUpdate();
+            System.out.println("Player " + name + "'s final data updated in Players table.");
         } 
         finally 
         {

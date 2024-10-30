@@ -115,18 +115,41 @@ public class GameGUI extends JFrame
         option1Button.addActionListener(e -> gameController.handleOption1());
         option2Button.addActionListener(e -> gameController.handleOption2());
         option3Button.addActionListener(e -> gameController.handleOption3());
-
-        quitButton.addActionListener(e -> 
-        {
-            int choice = JOptionPane.showConfirmDialog(
-                    this, "Are you sure you want to quit?", "Quit Confirmation", JOptionPane.YES_NO_OPTION
-            );
-            if (choice == JOptionPane.YES_OPTION) 
-            {
-                System.exit(0);
-            }
-        });
+        
+        quitButton.addActionListener(e -> showCustomQuitDialog());
     }
+    
+    private void showCustomQuitDialog() 
+    {
+        Object[] options = {"Quit and Save Player", "Quit and Don't Save Player", "Cancel"};
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                "Are you sure you want to quit?",
+                "Quit Confirmation",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        switch (choice) 
+        {
+            case JOptionPane.YES_OPTION: // "Quit and Save Player"
+                gameController.saveFinalPlayerData(); // Ensures final player data is saved before quitting
+                System.exit(0);
+                break;
+            case JOptionPane.NO_OPTION: // "Quit and Don't Save Player"
+                System.exit(0);
+                break;
+            case JOptionPane.CANCEL_OPTION: // "Cancel"
+                // Do nothing, returning the player to the game
+                break;
+            default:
+                break;
+        }
+    }
+
     
     public void initializeGameForPlayer() 
     {
