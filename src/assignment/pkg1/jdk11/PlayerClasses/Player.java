@@ -24,17 +24,24 @@ public class Player
     private GameGUI gui;
     private LootItem equippedItem; // Holds the currently equipped item
 
+    // Constructor for a new player (starting fresh)
     public Player(String name, GameGUI gui, GameController gameController) 
     {
-        this.name = name;
-        this.hp = 100;
-        this.goodXP = 0;
-        this.evilXP = 0;
-        this.neutralXP = 0;
-        this.inventory = new Inventory();
-        this.gui = gui;
+        this(name, 100, 0, 0, 0, gui, gameController); // Default HP and XP for a new player
+    }
 
-        // Initialize the LootChest, passing in inventory, gui, and gameController
+    // Constructor for loading an existing player with saved stats
+    public Player(String name, int hp, int goodXP, int evilXP, int neutralXP, GameGUI gui, GameController gameController) 
+    {
+        this.name = name;
+        this.hp = hp;
+        this.goodXP = goodXP;
+        this.evilXP = evilXP;
+        this.neutralXP = neutralXP;
+        this.gui = gui;
+        
+        // Initialize inventory and loot chest
+        this.inventory = new Inventory();
         this.lootChest = new LootChest(inventory, gui, gameController);
 
         inventory.addItem("Healing potion", 4); // Initial inventory setup

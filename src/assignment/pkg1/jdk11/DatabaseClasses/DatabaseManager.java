@@ -9,6 +9,7 @@ package assignment.pkg1.jdk11.DatabaseClasses;
  * @author jackson and layne
  */
 
+import assignment.pkg1.jdk11.PlayerClasses.PlayerData;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -23,7 +24,7 @@ public class DatabaseManager
     private static final String DB_URL = "jdbc:derby:C:/Users/layne/OneDrive - AUT University/Software design and construction/assignment 1 - group project/Assignment 1 - JDK 11/Assignment 1 - JDK11/Game_Database;create=true";
     private Connection connection = null;
 
-    // Constructor to initialize the connection
+    // Constructor to initialize the connection and create tables if necessary
     public DatabaseManager() 
     {
         try 
@@ -61,10 +62,7 @@ public class DatabaseManager
                 connection.close();
             }
         } 
-        catch (SQLException e) 
-        {
-            e.printStackTrace();
-        }
+        catch (SQLException e) {}
     }
 
     // Create tables for Players and HighScores if they don't exist
@@ -76,6 +74,9 @@ public class DatabaseManager
                     "id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
                     "name VARCHAR(100) NOT NULL," +
                     "hp INTEGER NOT NULL," +
+                    "goodXP INTEGER NOT NULL," +
+                    "evilXP INTEGER NOT NULL," +
+                    "neutralXP INTEGER NOT NULL," +
                     "xp INTEGER NOT NULL)";
             stmt.executeUpdate(createPlayersTable);
 
@@ -94,17 +95,13 @@ public class DatabaseManager
             {
                 System.out.println("Tables already exist.");
             } 
-            else 
-            {
-                e.printStackTrace();
-            }
         }
     }
 
     // Insert a player into the Players table
-    public void insertPlayer(String name, int hp, int xp) 
+    public void insertPlayer(String name, int hp, int goodXP, int evilXP, int neutralXP, int totalXP) 
     {
-        String query = "INSERT INTO Players (name, hp, xp) VALUES (?, ?, ?)";
+        String query = "INSERT INTO Players (name, hp, goodXP, evilXP, neutralXP, xp) VALUES (?, ?, ?, ?, ?, ?)";
         try 
         {
             connect();
@@ -113,7 +110,10 @@ public class DatabaseManager
             {
                 pstmt.setString(1, name);
                 pstmt.setInt(2, hp);
-                pstmt.setInt(3, xp);
+                pstmt.setInt(3, goodXP);
+                pstmt.setInt(4, evilXP);
+                pstmt.setInt(5, neutralXP);
+                pstmt.setInt(6, totalXP);
                 pstmt.executeUpdate();
                 connection.commit();
                 System.out.println("Player " + name + " inserted into Players table.");
@@ -125,11 +125,7 @@ public class DatabaseManager
             {
                 connection.rollback();
             } 
-            catch (SQLException rollbackEx) 
-            {
-                rollbackEx.printStackTrace();
-            }
-            e.printStackTrace();
+            catch (SQLException rollbackEx) {}
         } 
         finally 
         {
@@ -160,11 +156,7 @@ public class DatabaseManager
             {
                 connection.rollback();
             } 
-            catch (SQLException rollbackEx) 
-            {
-                rollbackEx.printStackTrace();
-            }
-            e.printStackTrace();
+            catch (SQLException rollbackEx) {}
         } 
         finally 
         {
@@ -172,11 +164,99 @@ public class DatabaseManager
         }
     }
 
-    // Fetch all players from the Players table
-    public List<String> getPlayers() 
+    // Fetch player data for a specific player from the Players table
+    public PlayerData getPlayerData(String playerName) 
     {
-        List<String> players = new ArrayList<>();
-        String query = "SELECT name, hp, xp FROM Players";
+        String query = "SELECT * FROM Players WHERE name = ?";
+        try 
+        {
+            connect();
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) 
+            {
+                pstmt.setString(1, playerName);
+                try (ResultSet rs = pstmt.executeQuery()) 
+                {
+                    if (rs.next()) 
+                    {
+                        int hp = rs.getInt("hp");
+                        int goodXP = rs.getInt("goodXP");
+                        int evilXP = rs.getInt("evilXP");
+                        int neutralXP = rs.getInt("neutralXP");
+                        return new PlayerData(playerName, hp, goodXP, evilXP, neutralXP);
+                    }
+                }
+            }
+        } 
+        catch (SQLException e) {}
+        finally 
+        {
+            disconnect();
+        }
+        return null; // No player found
+    }
+
+    // Update player data in the Players table
+    public void updatePlayer(String name, int hp, int goodXP, int evilXP, int neutralXP, int totalXP) 
+    {
+        String query = "UPDATE Players SET hp = ?, goodXP = ?, evilXP = ?, neutralXP = ?, xp = ? WHERE name = ?";
+        try 
+        {
+            connect();
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) 
+            {
+                pstmt.setInt(1, hp);
+                pstmt.setInt(2, goodXP);
+                pstmt.setInt(3, evilXP);
+                pstmt.setInt(4, neutralXP);
+                pstmt.setInt(5, totalXP);
+                pstmt.setString(6, name);
+                pstmt.executeUpdate();
+                System.out.println("Player " + name + "'s data updated in Players table.");
+            }
+        } 
+        catch (SQLException e) {}
+        finally 
+        {
+            disconnect();
+        }
+    }
+
+    // Delete player data from both Players and HighScores tables
+    public void deletePlayerData(String playerName) 
+    {
+        String deleteFromPlayers = "DELETE FROM Players WHERE name = ?";
+        String deleteFromHighScores = "DELETE FROM HighScores WHERE name = ?";
+        try 
+        {
+            connect();
+            // Delete from Players table
+            try (PreparedStatement pstmt = connection.prepareStatement(deleteFromPlayers)) 
+            {
+                pstmt.setString(1, playerName);
+                pstmt.executeUpdate();
+                System.out.println("Player " + playerName + " deleted from Players table.");
+            }
+
+            // Delete from HighScores table
+            try (PreparedStatement pstmt = connection.prepareStatement(deleteFromHighScores)) 
+            {
+                pstmt.setString(1, playerName);
+                pstmt.executeUpdate();
+                System.out.println("Player " + playerName + " deleted from HighScores table.");
+            }
+        } 
+        catch (SQLException e) {}
+        finally 
+        {
+            disconnect();
+        }
+    }
+
+    // Fetch all high scores from the HighScores table
+    public List<String> getHighScores() 
+    {
+        List<String> highScores = new ArrayList<>();
+        String query = "SELECT name, score FROM HighScores ORDER BY score DESC";
         try 
         {
             connect();
@@ -184,72 +264,20 @@ public class DatabaseManager
             {
                 while (rs.next()) 
                 {
-                    String player = "Name: " + rs.getString("name") + ", HP: " + rs.getInt("hp") + ", XP: " + rs.getInt("xp");
-                    players.add(player);
+                    highScores.add(rs.getString("name") + ": " + rs.getInt("score"));
                 }
             }
         } 
-        catch (SQLException e) 
-        {
-            e.printStackTrace();
-        } 
-        finally 
-        {
-            disconnect();
-        }
-        return players;
-    }
-    
-    public List<String> getHighScores() 
-    {
-        List<String> highScores = new ArrayList<>();
-        String query = "SELECT name, score FROM HighScores ORDER BY score DESC";
-        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) 
-        {
-            connect();
-            while (rs.next()) 
-            {
-                highScores.add(rs.getString("name") + ": " + rs.getInt("score"));
-            }
-        } 
-        catch (SQLException e) 
-        {
-            e.printStackTrace();
-        }
+        catch (SQLException e) {}
         finally 
         {
             disconnect();
         }
         return highScores;
     }
-    
+
     public Connection getConnection() 
     {
         return connection;
-    }
-
-    public void updatePlayer(String name, int finalHp, int finalXp) 
-    {
-        String query = "UPDATE Players SET hp = ?, xp = ? WHERE name = ?";
-        try 
-        {
-            connect();
-            try (PreparedStatement pstmt = connection.prepareStatement(query)) 
-            {
-                pstmt.setInt(1, finalHp);
-                pstmt.setInt(2, finalXp);
-                pstmt.setString(3, name);
-                pstmt.executeUpdate();
-                System.out.println("Player " + name + "'s final data updated in Players table.");
-            }
-        } 
-        catch (SQLException e) 
-        {
-            e.printStackTrace();
-        } 
-        finally 
-        {
-            disconnect();
-        }
     }
 }

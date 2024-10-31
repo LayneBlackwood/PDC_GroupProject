@@ -63,7 +63,6 @@ public class SummaryScreen extends JFrame
         catch (SQLException e) 
         {
             leaderboardData.append("Error fetching data.");
-            e.printStackTrace();
         } 
         finally 
         {

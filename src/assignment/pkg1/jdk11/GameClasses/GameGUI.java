@@ -89,7 +89,7 @@ public class GameGUI extends JFrame
     }
 
     private void showCustomQuitDialog() 
-    {
+        {
         Object[] options = {"Quit and Save Player", "Quit and Don't Save Player", "Cancel"};
         int choice = JOptionPane.showOptionDialog(
                 this,
@@ -105,19 +105,20 @@ public class GameGUI extends JFrame
         switch (choice) 
         {
             case JOptionPane.YES_OPTION: // "Quit and Save Player"
-                gameController.saveFinalPlayerData(); // Ensures final player data is saved before quitting
-                gameController.showSummaryScreen();
+                gameController.saveFinalPlayerData(); // Save to `Players` table
+                gameController.saveHighScoreToDatabase(); // Save to `HighScores` table
+                gameController.showSummaryScreen(); // Show summary screen
                 break;
             case JOptionPane.NO_OPTION: // "Quit and Don't Save Player"
                 gameController.showSummaryScreen();
                 break;
-            case JOptionPane.CANCEL_OPTION: // "Cancel"
-                // Do nothing, returning the player to the game
+            case JOptionPane.CANCEL_OPTION: // Cancel option
                 break;
             default:
                 break;
         }
     }
+
 
     public void initializeGameForPlayer() 
     {
@@ -156,6 +157,8 @@ public class GameGUI extends JFrame
 
     public void loadNextScenario() 
     {
+        clearScenarioTextArea();  // Clear previous scenario information
+
         if (scenarioReader == null) 
         {
             appendText("Scenarios file not loaded.");
@@ -165,14 +168,11 @@ public class GameGUI extends JFrame
         try 
         {
             String title = scenarioReader.readLine();
-
-            // If we reached the end of the file, reset to the beginning
             if (title == null) 
             {
-                // Close and reopen the reader to reset it
-                scenarioReader.close();
-                scenarioReader = new BufferedReader(new FileReader("scenarios.txt"));
-                title = scenarioReader.readLine(); // Start from the beginning again
+                appendText("\nNo more scenarios available. The game is over.");
+                disableGameOptions();
+                return;
             }
 
             appendText("\n" + title + "\n");
@@ -199,12 +199,11 @@ public class GameGUI extends JFrame
             appendText("\nError reading next scenario: " + e.getMessage());
         }
     }
-
-
+    
     public void appendText(String text) 
     {
-        scenarioTextArea.append(text);
-        scenarioTextArea.setCaretPosition(scenarioTextArea.getDocument().getLength());
+        scenarioTextArea.append(text + "\n");
+        scenarioTextArea.setCaretPosition(scenarioTextArea.getDocument().getLength());  // Auto-scrolls to the latest text
     }
 
     public void updatePlayerStats(int health, int xp) 
@@ -224,6 +223,11 @@ public class GameGUI extends JFrame
     public JTextArea getScenarioTextArea() 
     {
         return scenarioTextArea;
+    }
+    
+    public void clearScenarioTextArea() 
+    {
+        scenarioTextArea.setText("");  // Clears the current text in the scenario area
     }
 }
 

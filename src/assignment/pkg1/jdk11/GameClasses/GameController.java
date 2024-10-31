@@ -9,6 +9,7 @@ import assignment.pkg1.jdk11.DatabaseClasses.DatabaseManager;
 import assignment.pkg1.jdk11.EnemyClasses.Enemy;
 import assignment.pkg1.jdk11.EnemyClasses.EnemyFactory;
 import assignment.pkg1.jdk11.PlayerClasses.Player;
+import assignment.pkg1.jdk11.PlayerClasses.PlayerData;
 import javax.swing.SwingWorker;
 
 /**
@@ -33,7 +34,7 @@ public class GameController
     {
         this.gameGUI = gameGUI;
         this.dbManager = new DatabaseManager();
-        
+
         try 
         {
             dbManager.connect();
@@ -48,9 +49,46 @@ public class GameController
 
     public void startGame(String playerName) 
     {
-        this.player = new Player(playerName, gameGUI, this);
+        PlayerData existingPlayerData = dbManager.getPlayerData(playerName);
+
+        if (existingPlayerData != null) 
+        {
+            int choice = JOptionPane.showOptionDialog(
+                gameGUI,
+                "Player already exists. Do you want to continue with saved stats or override?",
+                "Player Exists",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                new Object[]{"Continue", "Override"},
+                "Continue"
+            );
+            
+            // Continue with saved stats
+            if (choice == JOptionPane.YES_OPTION) 
+            { 
+                this.player = new Player(playerName, existingPlayerData.getHp(), existingPlayerData.getGoodXP(),
+                        existingPlayerData.getEvilXP(), existingPlayerData.getNeutralXP(), gameGUI, this);
+                JOptionPane.showMessageDialog(gameGUI, "Continuing with saved stats.");
+            } 
+            else // Override with new data
+            { 
+                dbManager.deletePlayerData(playerName); // Delete existing data from both tables
+                this.player = new Player(playerName, gameGUI, this); // Start fresh
+                dbManager.insertPlayer(playerName, player.getHp(), player.getGoodXP(), player.getEvilXP(), player.getNeutralXP(), player.getTotalXP());
+                JOptionPane.showMessageDialog(gameGUI, "Player data overridden. Starting fresh.");
+            }
+        } 
+        else 
+        {
+            // New player, just insert into the database
+            this.player = new Player(playerName, gameGUI, this);
+            dbManager.insertPlayer(playerName, player.getHp(), player.getGoodXP(), player.getEvilXP(), player.getNeutralXP(), player.getTotalXP());
+        }
+
         gameGUI.initializeGameForPlayer();
     }
+
 
     public String getPlayerName() 
     {
@@ -118,7 +156,7 @@ public class GameController
         SwingWorker<Void, String> worker = new SwingWorker<>() 
         {
             @Override
-            protected Void doInBackground() throws Exception 
+            protected Void doInBackground() 
             {
                 FightEnemyAction fight = new FightEnemyAction(player, currentEnemy, gameGUI.getScenarioTextArea(), gameGUI);
                 fight.startFight();
@@ -135,7 +173,8 @@ public class GameController
                     {
                         endGame();
                     } 
-                    else if (currentEnemy.getHp() <= 0) {
+                    else if (currentEnemy.getHp() <= 0) 
+                    {
                         gameGUI.appendText("\nEnemy defeated!");
                         gameGUI.loadNextScenario();
                     } 
@@ -144,10 +183,7 @@ public class GameController
                         gameGUI.appendText("\nEnemy HP: " + currentEnemy.getHp());
                     }
                 } 
-                catch (Exception ex) 
-                {
-                    ex.printStackTrace();
-                }
+                catch (Exception ex) {}
             }
         };
         worker.execute();
@@ -172,7 +208,7 @@ public class GameController
         try 
         {
             dbManager.connect();
-            dbManager.updatePlayer(player.getName(), player.getHp(), player.getTotalXP());
+            dbManager.updatePlayer(player.getName(), player.getHp(), player.getGoodXP(), player.getEvilXP(), player.getNeutralXP(), player.getTotalXP());
             dbManager.disconnect();
         } 
         catch (SQLException e) 
@@ -189,10 +225,7 @@ public class GameController
             dbManager.insertHighScore(player.getName(), player.getTotalXP());
             dbManager.disconnect();
         } 
-        catch (SQLException e) 
-        {
-            e.printStackTrace();
-        }
+        catch (SQLException e) {}
     }
 
     public void showSummaryScreen() 
